@@ -6,6 +6,10 @@ Elixir SDK to communicate with Geckoboard API, primarily with their new API for 
 
 You can use the functions in `ExGecko.Api` for making requests to RESTful api of Geckoboard. There are shorthand functions that wrap the common get requests on the Geckboard resources.
 
+Be sure you set the environment variable before you use it
+
+`export GECKO_API_KEY=<key>`
+
 
 ### Examples
 ```elixir

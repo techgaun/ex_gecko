@@ -94,8 +94,13 @@ defmodule ExGecko.Api do
   and also the user agent
   """
   def request_header(headers) do
-    api_key = "#{System.get_env("GECKO_API_KEY")}:"
-    headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
+    api_key = System.get_env("GECKO_API_KEY")
+    if is_nil(api_key) do
+      raise "Geckoboard API Key is missing"
+    else
+      api_key = api_key <> ":"
+      headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
+    end
   end
 
   def request_header, do: request_header(@user_agent)
