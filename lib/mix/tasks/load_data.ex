@@ -33,7 +33,10 @@ defmodule Mix.Tasks.LoadData do
   def _run(_dataset, type) when is_nil(type), do: log("No 'type' was provided, please use the --type/-t switch statement'")
   def _run(dataset, "papertrail") do
     events = ExGecko.Adapter.Papertrail.load_events()
-    put_data(dataset, events)
+    limit = events
+    |> Enum.chunk(length(events)-1)
+    |> Enum.at(0)
+    put_data(dataset, limit)
   end
   def _run(dataset, "pt"), do: _run(dataset, "papertrail")
   def _run(_dataset, type), do: log("Do not know how to handle type '#{type}'")

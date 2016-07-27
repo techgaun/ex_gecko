@@ -30,7 +30,6 @@ defmodule ExGecko.Api do
     req_header = request_header_content_type
     if put_data |> is_map do
       put_data = Poison.encode!(put_data)
-      IO.inspect put_data
     end
     build_url(id, data)
     |> Api.put(put_data, req_header)

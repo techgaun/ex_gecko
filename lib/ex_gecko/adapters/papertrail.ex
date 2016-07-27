@@ -9,8 +9,7 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
     Application.ensure_all_started(:porcelain)
     case Porcelain.exec("papertrail", ["-S", opts["search"], "--min-time", "'#{opts["time"]}'"]) do
       %{status: 0, out: output} ->
-        output 
-        |> String.strip
+        output
         |> String.split("\n")
         |> Enum.map(fn(line) ->
            data = String.split(line, " ")
