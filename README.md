@@ -1,10 +1,10 @@
 # ex_gecko [![Build Status](https://semaphoreci.com/api/v1/brucewang/ex_gecko/branches/master/badge.svg)](https://semaphoreci.com/brucewang/ex_gecko)
 
-Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer-beta.geckoboard.com/).  The SDK is initially based off of the node.js implementation described [here](https://developer-beta.geckoboard.com/nodejs/)
+Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer-beta.geckoboard.com/).  The SDK is initially based off of the node.js implementation described [here](https://developer-beta.geckoboard.com/nodejs/) and source [here](https://github.com/geckoboard/geckoboard-node)
 
 ## Usage
 
-You can use the functions in `ExGecko.Api` for making requests to RESTful api of BrighterLink. There are shorthand functions that wrap the common get requests on the Brighterlink resources.
+You can use the functions in `ExGecko.Api` for making requests to RESTful api of Geckoboard. There are shorthand functions that wrap the common get requests on the Geckboard resources.
 
 
 ### Examples

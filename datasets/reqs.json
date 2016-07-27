@@ -1,4 +1,3 @@
-// The Requests dataset, so we can capture the request path, the number (1), the request speed and the timetstamp
 {
   "fields": {
     "path": {

@@ -24,40 +24,12 @@ defmodule ExGecko.Api do
   Wrapper for GET requests
 
   Example
-  - Brighterx.Api.find(Brighterx.Resources.Company, [params: %{name: "Brightergy"}])
-
-  - A tuple of {:ok, [%Brighterx.Resource.<ResourceType>{}]} is returned for successful requests
-  - For http status code 204, a :ok atom is returned indicating the request was fulfilled successfully
-    but no response body i.e. message-body
-  - For all other errors, a tuple of {:ok, <error_detail_map>, status_code} is returned
   """
-  @spec find(any, list) :: Brighterx.response
-  def find(module, opts \\ []) do
-    id = opts[:id] || nil
-    params = opts[:params] || %{}
-    token = System.get_env("JWT")
-    req_header = request_header(%{token: token})
-    build_url(id, params)
+  @spec find(String.t) :: ExGecko.response
+  def find(id) do
+    req_header = request_header
+    build_url(id)
     |> Api.get(req_header)
-    |> Parser.parse
-  end
-
-  @doc """
-  Wrapper for POST requests
-
-  Examples
-  - Brighterx.Api.create(Brighterx.Resources.Device, %{name: "Test Thermostat", identifier: "00:01", facility_id: 1, type: "thermostat"})
-  - Brighterx.Api.create(Brighterx.Resources.Company, "{\"name\": \"Samar\"}")
-  """
-  @spec create(map, list) :: Brighterx.response
-  def create(post_data, _opts \\ []) do
-    token = System.get_env("GECKO_API_KEY")
-    req_header = request_header_content_type(%{token: token})
-    if post_data |> is_map do
-      post_data = Poison.encode!(post_data)
-    end
-    build_url(nil, %{})
-    |> Api.post(post_data, req_header)
     |> Parser.parse
   end
 
@@ -65,20 +37,14 @@ defmodule ExGecko.Api do
   Wrapper for PUT requests
 
   Examples
-  With body as map
-  - Brighterx.Api.update(Brighterx.Resources.Device, 1, %{name: "7th floor south"})
-
-  With body as JSON string
-  - Brighterx.Api.update(Brighterx.Resources.Device, 1, "{\"name\": \"7th Floor West\"}")
   """
-  @spec update(String.t, map) :: Brighterx.response
-  def update(id, put_data) do
-    token = System.get_env("GECKO_API_KEY")
-    req_header = request_header_content_type(%{token: token})
+  @spec update(String.t, map) :: ExGecko.response
+  def update(id, put_data, data \\ false) do
+    req_header = request_header_content_type
     if put_data |> is_map do
       put_data = Poison.encode!(put_data)
     end
-    build_url(id, %{})
+    build_url(id, data)
     |> Api.put(put_data, req_header)
     |> Parser.parse
   end
@@ -87,12 +53,11 @@ defmodule ExGecko.Api do
   Wrapper for DELETE requests
 
   Examples
-  - Brighterx.Api.delete(Brighterx.Resources.Device, 1)
+  - ExGecko.Api.delete("mydataset")
   """
-  @spec remove(String.t, list) :: Brighterx.response
-  def remove(id, _opts \\ []) do
-    token = System.get_env("GECKO_API_KEY")
-    req_header = request_header(%{token: token})
+  @spec delete(String.t) :: Brighterx.response
+  def delete(id) do
+    req_header = request_header
     build_url(id)
     |> Api.delete(req_header)
     |> Parser.parse
@@ -110,19 +75,31 @@ defmodule ExGecko.Api do
   @spec ping() :: ExGecko.response
   def ping, do: find(%{})
   @spec find_or_create(String.t, map) :: ExGecko.response
-  def find_or_create(id, fields), do: find(id, fields)
+  def find_or_create(id, fields) do
+    # first find the dataset, and only create it if it doesn't exist
+    {:ok, obj, code} = find(id)
+    if obj |> is_nil do
+      # call create
+      update(id, fields, true)
+    end
+  end
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data), do: find(id, data)
-  @spec delete(String.t) :: ExGecko.response
-  def delete(id), do: remove(id)
+  def put(id, data), do: update(id, data)
+  @spec create_reqs_dataset(String.t) :: ExGecko.response
+  def create_reqs_dataset(id) do
+    {:ok, fields} = "datasets/reqs.json" |> File.read
+    find_or_create(id, fields)
+  end
+
 
   @doc """
   Builds URL based on the resource, id and parameters
   """
-  @spec build_url(String.t, map) :: String.t
-  def build_url(id, params \\ %{}) do
-    "/datasets/#{id}?#{URI.encode_query(params)}"
-  end
+  @spec build_url(String.t) :: String.t
+  def build_url(id), do: "/datasets/#{id}"
+  def build_url(id, true), do: build_url(id) <> "/data"
+  def build_url(id, false), do: build_url(id)
+
 
   def url, do: "https://api.geckoboard.com/"
   
@@ -130,7 +107,11 @@ defmodule ExGecko.Api do
   Add header with username
   and also the user agent
   """
-  def request_header(%{api_key: api_key}, headers), do: headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
-  def request_header(opts), do: request_header(opts, @user_agent)
-  def request_header_content_type(opts), do: @content_type ++ request_header(opts)
+  def request_header(headers) do
+    api_key = System.get_env("GECKO_API_KEY")
+    headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
+  end
+
+  def request_header, do: request_header(@user_agent)
+  def request_header_content_type, do: @content_type ++ request_header
 end
