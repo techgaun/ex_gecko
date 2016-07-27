@@ -21,24 +21,11 @@ defmodule ExGecko.Api do
   end
 
   @doc """
-  Wrapper for GET requests
-
-  Example
-  """
-  @spec find(String.t) :: ExGecko.response
-  def find(id) do
-    req_header = request_header
-    build_url(id)
-    |> Api.get(req_header)
-    |> Parser.parse
-  end
-
-  @doc """
   Wrapper for PUT requests
 
   Examples
   """
-  @spec update(String.t, map) :: ExGecko.response
+  @spec update(String.t, map, boolean) :: ExGecko.response
   def update(id, put_data, data \\ false) do
     req_header = request_header_content_type
     if put_data |> is_map do
@@ -73,18 +60,16 @@ defmodule ExGecko.Api do
   - ExGecko.Api.delete - deletes the dataset and data therein
   """
   @spec ping() :: ExGecko.response
-  def ping, do: find(%{})
-  @spec find_or_create(String.t, map) :: ExGecko.response
-  def find_or_create(id, fields) do
-    # first find the dataset, and only create it if it doesn't exist
-    {:ok, obj, code} = find(id)
-    if obj |> is_nil do
-      # call create
-      update(id, fields, true)
-    end
+  def ping do 
+    req_header = request_header
+    build_url(nil)
+    |> Api.get(req_header)
+    |> Parser.parse
   end
+  @spec find_or_create(String.t, map) :: ExGecko.response
+  def find_or_create(id, fields), do: update(id, fields, false)
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data), do: update(id, data)
+  def put(id, data), do: update(id, data, true)
   @spec create_reqs_dataset(String.t) :: ExGecko.response
   def create_reqs_dataset(id) do
     {:ok, fields} = "datasets/reqs.json" |> File.read
@@ -96,6 +81,7 @@ defmodule ExGecko.Api do
   Builds URL based on the resource, id and parameters
   """
   @spec build_url(String.t) :: String.t
+  def build_url(id) when is_nil(id), do: "/"
   def build_url(id), do: "/datasets/#{id}"
   def build_url(id, true), do: build_url(id) <> "/data"
   def build_url(id, false), do: build_url(id)
@@ -108,7 +94,7 @@ defmodule ExGecko.Api do
   and also the user agent
   """
   def request_header(headers) do
-    api_key = System.get_env("GECKO_API_KEY")
+    api_key = "#{System.get_env("GECKO_API_KEY")}:"
     headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
   end
 
