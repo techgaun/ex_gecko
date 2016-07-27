@@ -22,7 +22,7 @@ defmodule ExGecko.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison]]
+    [applications: [:logger, :httpoison, :porcelain]]
   end
 
   # Dependencies can be Hex packages:
@@ -38,10 +38,11 @@ defmodule ExGecko.Mixfile do
     [
       {:httpoison, "~> 0.8.0"},
       {:poison, "~> 1.5.2"},
+      {:porcelain, "~> 2.0"},
       {:excoveralls, "~> 0.5.4", only: :test},
       {:earmark, "~> 0.1", only: :dev},
       {:ex_doc, "~> 0.11", only: :dev},
-      #{:dogma, "~> 0.1", only: [:dev, :test]},
+      {:dogma, "~> 0.1", only: [:dev, :test]},
       {:mock, "~> 0.1.1", only: :test}
     ]
   end

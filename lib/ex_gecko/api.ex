@@ -30,6 +30,7 @@ defmodule ExGecko.Api do
     req_header = request_header_content_type
     if put_data |> is_map do
       put_data = Poison.encode!(put_data)
+      IO.inspect put_data
     end
     build_url(id, data)
     |> Api.put(put_data, req_header)
@@ -69,7 +70,8 @@ defmodule ExGecko.Api do
   @spec find_or_create(String.t, map) :: ExGecko.response
   def find_or_create(id, fields), do: update(id, fields, false)
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data), do: update(id, data, true)
+  def put(id, data) when is_list(data), do: update(id, %{"data" => data}, true)
+  def put(id, data) when is_map(data), do: update(id, data, true)
   @spec create_reqs_dataset(String.t) :: ExGecko.response
   def create_reqs_dataset(id) do
     {:ok, fields} = "datasets/reqs.json" |> File.read

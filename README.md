@@ -10,10 +10,25 @@ Be sure you set the environment variable before you use it
 
 `export GECKO_API_KEY=<key>`
 
+or you can run the mix task included here to dump various datapoints into your existing dataset
+
+`mix load_data -t papertrail -d mydataset`
+
 
 ### Examples
 ```elixir
+
+__Ensure authention works__
+ExGecko.Api.ping
+
+__Find or create the dataset__
 ExGecko.Api.find_or_create("mydataset", %{"fields" => %{"path" => %{"type" => "string", "name" => "Request Path"}, "speed" => %{"type" => "number", "name" => "Request Speed"}}})
+
+__Replace data in dataset__
+ExGecko.Api.put("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
+
+__Delete dataset__
+ExGecko.Api.delete("mydataset")
 
 ```
 
