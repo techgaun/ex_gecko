@@ -1,4 +1,4 @@
-defmodule Brighterx.Api do
+defmodule ExGecko.Api do
   @moduledoc """
   API interface to communicate with geckoboard's api
 
@@ -6,8 +6,7 @@ defmodule Brighterx.Api do
   """
 
   use HTTPoison.Base
-  alias Brighterx.Parser
-  alias Brighterx.Resources.{Company, Facility, Device}
+  alias ExGecko.Parser
   alias __MODULE__
 
   @user_agent [{"User-agent", "ex_gecko"}]
@@ -38,10 +37,9 @@ defmodule Brighterx.Api do
     params = opts[:params] || %{}
     token = System.get_env("JWT")
     req_header = request_header(%{token: token})
-    module
-    |> build_url(id, params)
+    build_url(id, params)
     |> Api.get(req_header)
-    |> Parser.parse(module)
+    |> Parser.parse
   end
 
   @doc """
@@ -51,17 +49,16 @@ defmodule Brighterx.Api do
   - Brighterx.Api.create(Brighterx.Resources.Device, %{name: "Test Thermostat", identifier: "00:01", facility_id: 1, type: "thermostat"})
   - Brighterx.Api.create(Brighterx.Resources.Company, "{\"name\": \"Samar\"}")
   """
-  @spec create(any, map, list) :: Brighterx.response
-  def create(module, post_data, _opts \\ []) do
-    token = System.get_env("JWT")
+  @spec create(map, list) :: Brighterx.response
+  def create(post_data, _opts \\ []) do
+    token = System.get_env("GECKO_API_KEY")
     req_header = request_header_content_type(%{token: token})
     if post_data |> is_map do
       post_data = Poison.encode!(post_data)
     end
-    module
-    |> build_url(nil, %{})
+    build_url(nil, %{})
     |> Api.post(post_data, req_header)
-    |> Parser.parse(module)
+    |> Parser.parse
   end
 
   @doc """
@@ -74,18 +71,16 @@ defmodule Brighterx.Api do
   With body as JSON string
   - Brighterx.Api.update(Brighterx.Resources.Device, 1, "{\"name\": \"7th Floor West\"}")
   """
-  @spec update(any, integer, map) :: Brighterx.response
-  def update(module, id, put_data) do
-    token = System.get_env("JWT")
+  @spec update(String.t, map) :: Brighterx.response
+  def update(id, put_data) do
+    token = System.get_env("GECKO_API_KEY")
     req_header = request_header_content_type(%{token: token})
     if put_data |> is_map do
       put_data = Poison.encode!(put_data)
     end
-
-    module
-    |> build_url(id, %{})
+    build_url(id, %{})
     |> Api.put(put_data, req_header)
-    |> Parser.parse(module)
+    |> Parser.parse
   end
 
   @doc """
@@ -94,14 +89,13 @@ defmodule Brighterx.Api do
   Examples
   - Brighterx.Api.delete(Brighterx.Resources.Device, 1)
   """
-  @spec find(any, list) :: Brighterx.response
-  def remove(module, id, _opts \\ []) do
-    token = System.get_env("JWT")
+  @spec remove(String.t, list) :: Brighterx.response
+  def remove(id, _opts \\ []) do
+    token = System.get_env("GECKO_API_KEY")
     req_header = request_header(%{token: token})
-    module
-    |> build_url(id)
+    build_url(id)
     |> Api.delete(req_header)
-    |> Parser.parse(module)
+    |> Parser.parse
   end
 
   @doc """
@@ -113,43 +107,30 @@ defmodule Brighterx.Api do
   - ExGecko.Api.put - replaces all data in the dataset
   - ExGecko.Api.delete - deletes the dataset and data therein
   """
+  @spec ping() :: ExGecko.response
+  def ping, do: find(%{})
   @spec find_or_create(String.t, map) :: ExGecko.response
-  def find_and_create(id, fields), do: find(Company, [id: id])
+  def find_or_create(id, fields), do: find(id, fields)
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data), do: find(Company, [id: id])
+  def put(id, data), do: find(id, data)
   @spec delete(String.t) :: ExGecko.response
-  def delete(id), do: find(Company, [id: id])
+  def delete(id), do: remove(id)
 
   @doc """
   Builds URL based on the resource, id and parameters
   """
-  @spec build_url(any, integer, map) :: String.t
-  def build_url(module, id, params \\ %{}) do
-    "Elixir.Brighterx.Resources." <> module_str = module
-      |> to_string
-    resource_path =
-      case module_str do
-        "Company" ->
-          "companies"
-        "Facility" ->
-          "facilities"
-        "Device" ->
-          "devices"
-        _ ->
-          raise ArgumentError, "Unknown resource type. Make sure you are requesting correct resource"
-      end
-    if id |> is_integer do
-      resource_path = "#{resource_path}/#{id}"
-    end
-    "/datasets/#{resource_path}?#{URI.encode_query(params)}"
+  @spec build_url(String.t, map) :: String.t
+  def build_url(id, params \\ %{}) do
+    "/datasets/#{id}?#{URI.encode_query(params)}"
   end
 
   def url, do: "https://api.geckoboard.com/"
   
   @doc """
-  Add authorization header which is basically a JWT token
+  Add header with username
   and also the user agent
   """
+  def request_header(%{api_key: api_key}, headers), do: headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
   def request_header(opts), do: request_header(opts, @user_agent)
   def request_header_content_type(opts), do: @content_type ++ request_header(opts)
 end

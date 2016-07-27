@@ -5,16 +5,24 @@ defmodule ExGecko.Mixfile do
     [app: :ex_gecko,
      version: "0.0.1",
      elixir: "~> 1.2",
+     elixirc_paths: ["lib"],
+     description: "A simple brighterlink api implementation",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps,
+     package: package,
+     test_coverage: [tool: ExCoveralls],
+     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test, "coveralls.semaphore": :test],
+     docs: [logo: "logo/brighterlink_logo.png",
+            extras: ["README.md"]]
+   ]
   end
 
   # Configuration for the OTP application
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :httpoison]]
   end
 
   # Dependencies can be Hex packages:
@@ -27,6 +35,25 @@ defmodule ExGecko.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [
+      {:httpoison, "~> 0.8.0"},
+      {:poison, "~> 1.5.2"},
+      {:excoveralls, "~> 0.5.4", only: :test},
+      {:earmark, "~> 0.1", only: :dev},
+      {:ex_doc, "~> 0.11", only: :dev},
+      #{:dogma, "~> 0.1", only: [:dev, :test]},
+      {:mock, "~> 0.1.1", only: :test}
+    ]
+  end
+
+  defp package do
+    [
+      maintainers: [
+        "Samar Acharya",
+        "Bruce Wang"
+      ],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/Brightergy/ex_gecko"}
+    ]
   end
 end
