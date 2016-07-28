@@ -18,16 +18,16 @@ or you can run the mix task included here to dump various datapoints into your e
 ### Examples
 ```elixir
 
-__Ensure authention works__
+**Ensure authention works**   
 ExGecko.Api.ping
 
-__Find or create the dataset__
+**Find or create the dataset**   
 ExGecko.Api.find_or_create("mydataset", %{"fields" => %{"path" => %{"type" => "string", "name" => "Request Path"}, "speed" => %{"type" => "number", "name" => "Request Speed"}}})
 
-__Replace data in dataset__
+**Replace data in dataset**   
 ExGecko.Api.put("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
 
-__Delete dataset__
+**Delete dataset**   
 ExGecko.Api.delete("mydataset")
 
 ```
