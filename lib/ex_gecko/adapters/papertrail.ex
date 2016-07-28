@@ -45,7 +45,6 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
   """
   def parse_line(line) do
     data = String.split(line, " ")
-    for idx <- 0..length(data)-1, do: IO.puts "#{idx} -> #{Enum.at(data, idx)}"
     timestamp = "2016-#{convert_month(Enum.at(data, 0))}-#{Enum.at(data, 1)}T#{Enum.at(data, 2)}Z"
     path = data |> Enum.at(7) |> String.split("path=") |> Enum.at(-1) |> String.replace("\"", "") |> String.split("_=") |> Enum.at(0)
     speed = data |> Enum.at(-4) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
