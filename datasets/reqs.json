@@ -12,6 +12,14 @@
       "type": "number",
       "name": "Request Speed"
     },
+    "size": {
+      "type": "number",
+      "name": "Request Size"
+    },
+    "status" : {
+      "type" : "string",
+      "name" : "Status Code"
+    },
     "timestamp": {
       "type": "datetime",
       "name": "Date"

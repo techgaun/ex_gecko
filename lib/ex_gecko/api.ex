@@ -72,8 +72,10 @@ defmodule ExGecko.Api do
   def put(id, data) when is_list(data), do: update(id, %{"data" => data}, true)
   def put(id, data) when is_map(data), do: update(id, data, true)
   @spec create_reqs_dataset(String.t) :: ExGecko.response
-  def create_reqs_dataset(id) do
-    {:ok, fields} = "datasets/reqs.json" |> File.read
+  def create_reqs_dataset(id), do: create_dataset(id, "reqs")
+  @spec create_dataset(String.t, String.t) :: ExGecko.response
+  def create_dataset(id, type \\ "reqs") do
+    {:ok, fields} = "datasets/#{type}.json" |> File.read
     find_or_create(id, fields)
   end
 
