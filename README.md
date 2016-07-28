@@ -21,13 +21,13 @@ or you can run the mix task included here to dump various datapoints into your e
 # Ensure authention works
 ExGecko.Api.ping
 
-# Find or create the dataset**   
+# Find or create the dataset   
 ExGecko.Api.find_or_create("mydataset", %{"fields" => %{"path" => %{"type" => "string", "name" => "Request Path"}, "speed" => %{"type" => "number", "name" => "Request Speed"}}})
 
-# Replace data in dataset**   
+# Replace data in dataset   
 ExGecko.Api.put("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
 
-# Delete dataset**   
+# Delete dataset   
 ExGecko.Api.delete("mydataset")
 
 ```
