@@ -41,7 +41,7 @@ ExGecko.Api.create_dataset("mynewdataset", "reqs")
 
 ### Datasets
 
-This SDK takes advantage of a new API provided by GeckoBoard, which allows for much easier data manipulation and charting.  By creating an adapter (see below), we can interact with a variety of services, and transform them to a simple format that we can send to the datasets api.  This will then allow us to create any charts.  An example of this can be seen on BrighterLink's public [geckoboard](https://brighterlink.geckoboard.com/edit/dashboards/197875)
+This SDK takes advantage of a new API provided by GeckoBoard, which allows for much easier data manipulation and charting.  By creating an adapter (see below), we can interact with a variety of services, and transform them to a simple format that we can send to the datasets api.  This will then allow us to create any charts.  An example of this can be seen on BrighterLink's public [geckoboard](https://brighterlink.geckoboard.com/dashboards/7E508A4880D2EAAB)
 
 ### Adapters
 
