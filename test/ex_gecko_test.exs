@@ -6,7 +6,10 @@ defmodule ExGeckoTest do
   @req_fields %{"count" => %{"name" => "Count", "type" => "number"},
      "path" => %{"name" => "Request Path", "type" => "string"},
      "speed" => %{"name" => "Request Speed", "type" => "number"},
-     "timestamp" => %{"name" => "Date", "type" => "datetime"}}
+     "timestamp" => %{"name" => "Date", "type" => "datetime"},
+     "status" => %{"name" => "Status Code", "type" => "string"},
+     "size" => %{"name" => "Request Size", "type" => "number"}
+   }
 
   setup do
     name = "testset_" <> (:os.timestamp |> elem(2) |> Integer.to_string)
