@@ -31,7 +31,8 @@ defmodule ExGecko.Api do
     if put_data |> is_map do
       put_data = Poison.encode!(put_data)
     end
-    build_url(id, data)
+    id
+    |> build_url(data)
     |> Api.put(put_data, req_header)
     |> Parser.parse
   end
@@ -45,7 +46,8 @@ defmodule ExGecko.Api do
   @spec delete(String.t) :: Brighterx.response
   def delete(id) do
     req_header = request_header
-    build_url(id)
+    id
+    |> build_url
     |> Api.delete(req_header)
     |> Parser.parse
   end
@@ -60,9 +62,10 @@ defmodule ExGecko.Api do
   - ExGecko.Api.delete - deletes the dataset and data therein
   """
   @spec ping() :: ExGecko.response
-  def ping do 
+  def ping do
     req_header = request_header
-    build_url(nil)
+    nil
+    |> build_url
     |> Api.get(req_header)
     |> Parser.parse
   end
@@ -84,14 +87,14 @@ defmodule ExGecko.Api do
   Builds URL based on the resource, id and parameters
   """
   @spec build_url(String.t) :: String.t
-  def build_url(id) when is_nil(id), do: "/"
+  def build_url(nil), do: "/"
   def build_url(id), do: "/datasets/#{id}"
   def build_url(id, true), do: build_url(id) <> "/data"
   def build_url(id, false), do: build_url(id)
 
 
   def url, do: "https://api.geckoboard.com/"
-  
+
   @doc """
   Add header with username
   and also the user agent

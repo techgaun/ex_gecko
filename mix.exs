@@ -6,7 +6,7 @@ defmodule ExGecko.Mixfile do
      version: "0.0.1",
      elixir: "~> 1.2",
      elixirc_paths: ["lib"],
-     description: "A simple brighterlink api implementation",
+     description: "Elixir SDK to communicate with Geckoboard's API",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps,
