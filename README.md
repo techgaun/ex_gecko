@@ -12,7 +12,11 @@ Be sure you set the environment variable before you use it
 
 or you can run the mix task included here to dump various datapoints into your existing dataset
 
-`mix load_data -t papertrail -d mydataset`
+__Create a new dataset 'mynewdataset' using the datasets/reqs.json format__   
+`mix load_data -d mynewdataset -r reqs`
+
+__Load papertrail data into geckoboard dataset 'mynewdataset'__   
+`mix load_data -t papertrail -d mynewdataset`
 
 
 ### Examples
@@ -29,6 +33,9 @@ ExGecko.Api.put("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/
 
 # Delete dataset   
 ExGecko.Api.delete("mydataset")
+
+# Create a dataset (using the schema located in datasets/<type>.json)
+ExGecko.Api.create_dataset("mynewdataset", "reqs")
 
 ```
 
