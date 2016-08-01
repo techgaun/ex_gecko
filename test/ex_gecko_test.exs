@@ -3,8 +3,7 @@ defmodule ExGeckoTest do
   doctest ExGecko
 
   @fields  %{"fields" => %{"amount" => %{"type" => "number", "name" => "Amount"}, "timestamp" => %{"type" => "datetime", "name" => "Date"}}}
-  @req_fields %{"count" => %{"name" => "Count", "type" => "number"},
-     "path" => %{"name" => "Request Path", "type" => "string"},
+  @req_fields %{"path" => %{"name" => "Request Path", "type" => "string"},
      "speed" => %{"name" => "Request Speed", "type" => "number"},
      "timestamp" => %{"name" => "Date", "type" => "datetime"},
      "status" => %{"name" => "Status Code", "type" => "string"},

@@ -5,9 +5,18 @@ Interacts with papertrail cli to get latest logs, so that we can send to geckoba
 papertrail -S "API Requests" --min-time '120 minutes ago'
 """
 
-  def load_events(opts \\ %{"time" => "72 hours ago", "search" => "API Requests"}) do
+  def load_events(opts) when is_nil(opts), do: load_events(%{})
+  def load_events(opts) when is_bitstring(opts) do
+    new_opts = opts
+    |> String.split(",")
+    |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
+    |> Map.new
+    load_events(new_opts)
+  end
+
+  def load_events(%{"search" => search, "time" => time} = opts) do
     Application.ensure_all_started(:porcelain)
-    case Porcelain.exec("papertrail", ["-S", opts["search"], "--min-time", "'#{opts["time"]}'"]) do
+    case Porcelain.exec("papertrail", ["-S", search, "--min-time", "'#{time}'"]) do
       %{status: 0, out: output} ->
         lines = output |> String.split("\n")
         for line <- lines, valid?(line), into: [], do: parse_line(line)
@@ -15,6 +24,11 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
         IO.puts "error executing command, #{status}, #{message}"
         []
       end
+  end
+
+  def load_events(opts) do
+    # set default search/time values
+    load_events(Map.merge(%{"time" => "72 hours ago", "search" => "API Requests"}, opts))
   end
 
   def valid?(line) when is_nil(line) or line == "", do: false
@@ -53,7 +67,7 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
     speed = data |> Enum.at(-4) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
     status = data |> Enum.at(-3) |> String.split("status=") |> Enum.at(-1)
     size = data |> Enum.at(-2) |> String.split("bytes=") |> Enum.at(-1) |> String.to_integer
-    %{"path" => path, "speed" => speed, "timestamp" => timestamp, "count" => 1, "status" => status, "size" => size}
+    %{"path" => path, "speed" => speed, "timestamp" => timestamp, "status" => status, "size" => size}
   end
 
   def convert_month(month) do

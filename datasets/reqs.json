@@ -4,10 +4,6 @@
       "type": "string",
       "name": "Request Path"
     },
-    "count": {
-      "type": "number",
-      "name": "Count"
-    },
     "speed": {
       "type": "number",
       "name": "Request Speed"
