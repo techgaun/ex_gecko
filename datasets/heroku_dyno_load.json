@@ -15,6 +15,10 @@
     "dyno" : {
       "type" : "string",
       "name" : "Dyno Identifier"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "name": "Timestamp"
     }
   }
 }
