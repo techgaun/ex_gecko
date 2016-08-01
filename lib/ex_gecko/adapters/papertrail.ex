@@ -5,7 +5,7 @@ Interacts with papertrail cli to get latest logs, so that we can send to geckoba
 papertrail -S "API Requests" --min-time '120 minutes ago'
 """
 
-  def load_events(opts \\ %{"time" => "24 hours ago", "search" => "API Requests"}) do
+  def load_events(opts \\ %{"time" => "1 hours ago", "search" => "API Requests"}) do
     Application.ensure_all_started(:porcelain)
     case Porcelain.exec("papertrail", ["-S", opts["search"], "--min-time", "'#{opts["time"]}'"]) do
       %{status: 0, out: output} ->
@@ -44,8 +44,11 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
   16 ->
   """
   def parse_line(line) do
-    data = String.split(line, " ")
-    timestamp = "2016-#{convert_month(Enum.at(data, 0))}-#{Enum.at(data, 1)}T#{Enum.at(data, 2)}Z"
+    data = line
+      |> String.replace("  ", " ")
+      |> String.split(" ")
+    {year, _, _} = :erlang.date
+    timestamp = "#{year}-#{convert_month(Enum.at(data, 0))}-#{format_day(Enum.at(data, 1))}T#{Enum.at(data, 2)}Z"
     path = data |> Enum.at(7) |> String.split("path=") |> Enum.at(-1) |> String.replace("\"", "") |> String.split("_=") |> Enum.at(0)
     speed = data |> Enum.at(-4) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
     status = data |> Enum.at(-3) |> String.split("status=") |> Enum.at(-1)
@@ -70,4 +73,25 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
       _ -> ":error"
     end
   end
+
+  @doc """
+  ## Examples
+
+      iex> ExGecko.Adapter.Papertrail.format_day("1")
+      "01"
+
+      iex> ExGecko.Adapter.Papertrail.format_day("11")
+      "11"
+  """
+  @spec format_day(String.t) :: String.t
+  def format_day(day) when is_bitstring(day) do
+    case String.length(day) do
+      1 ->
+        "0#{day}"
+
+      _ ->
+        day
+    end
+  end
+  def format_day(day), do: day
 end
