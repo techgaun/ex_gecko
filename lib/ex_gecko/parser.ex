@@ -17,7 +17,7 @@ defmodule ExGecko.Parser do
 
       {:ok, %HTTPoison.Response{body: body, headers: _, status_code: status}} ->
         {:ok, json} = Poison.decode(body)
-        {:error, json["errors"], status}
+        {:error, json["error"]["message"], status}
 
       {:error, %HTTPoison.Error{id: _, reason: reason}} ->
         {:error, %{reason: reason}}
