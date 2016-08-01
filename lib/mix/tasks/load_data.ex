@@ -27,7 +27,8 @@ defmodule Mix.Tasks.LoadData do
       )
     Application.ensure_all_started(:httpoison)
     case opts[:reset] do
-      nil -> _run(opts[:dataset], opts[:type])
+      nil ->
+        _run(opts[:dataset], opts[:type])
       _ ->
         reset_dataset(opts[:reset], opts[:dataset])
     end
@@ -39,6 +40,7 @@ defmodule Mix.Tasks.LoadData do
   def _run(_dataset, type) when is_nil(type), do: log("No 'type' was provided, please use the --type/-t switch statement'")
   def _run(dataset, "papertrail") do
     events = ExGecko.Adapter.Papertrail.load_events()
+      |> limit_data
     put_data(dataset, events)
   end
   def _run(dataset, "pt"), do: _run(dataset, "papertrail")
@@ -46,7 +48,7 @@ defmodule Mix.Tasks.LoadData do
 
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
   def reset_dataset("reqs", dataset) do
-    log("Deleteing the dataset '#{dataset}'")
+    log("Deleting the dataset '#{dataset}'")
     # delete will fail if it doesn't exist, but continue so we can create the new dataset
     ExGecko.Api.delete(dataset)
     log("creating dataset '#{dataset}' using schema 'reqs'")
@@ -62,6 +64,20 @@ defmodule Mix.Tasks.LoadData do
       {:error, error, code} ->
         log("HTTP Error #{code} (#{error}) loading papertrail data points")
     end
+  end
+
+  @doc """
+    ## Examples
+
+      iex> Mix.Tasks.LoadData.limit_data(Enum.to_list(1..500)) === Enum.to_list(101..500)
+      true
+  """
+  @spec limit_data(list) :: list
+  def limit_data(events) do
+    events
+    |> Enum.reverse
+    |> Enum.slice(0..399)
+    |> Enum.reverse
   end
 
 end

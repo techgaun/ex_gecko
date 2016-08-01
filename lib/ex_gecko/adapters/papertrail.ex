@@ -5,7 +5,7 @@ Interacts with papertrail cli to get latest logs, so that we can send to geckoba
 papertrail -S "API Requests" --min-time '120 minutes ago'
 """
 
-  def load_events(opts \\ %{"time" => "1 hours ago", "search" => "API Requests"}) do
+  def load_events(opts \\ %{"time" => "72 hours ago", "search" => "API Requests"}) do
     Application.ensure_all_started(:porcelain)
     case Porcelain.exec("papertrail", ["-S", opts["search"], "--min-time", "'#{opts["time"]}'"]) do
       %{status: 0, out: output} ->
