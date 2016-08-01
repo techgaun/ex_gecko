@@ -1,0 +1,20 @@
+{
+  "fields": {
+    "1m": {
+      "type": "number",
+      "name": "Load Average of Last One Minute"
+    },
+    "5m": {
+      "type": "number",
+      "name": "Load Average of Last Five Minutes"
+    },
+    "size": {
+      "type": "number",
+      "name": "Load Average of Last Fifteen Minutes"
+    },
+    "dyno" : {
+      "type" : "string",
+      "name" : "Dyno Identifier"
+    }
+  }
+}
