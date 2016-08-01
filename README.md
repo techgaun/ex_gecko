@@ -48,3 +48,11 @@ This SDK takes advantage of a new API provided by GeckoBoard, which allows for m
 A key feature is the ability of the sdk to parse data from known sources of information.  This lets you interact with the raw data from the source and convert it into the format that Geckoboard expects.
 
 * Papertrail - integrates with the papertrail cli to pump out log data, specifically needed for the reqs dataset.
+
+#### Papertrail
+
+The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/papertrail-cli) to be installed. Once installed, make sure you configure papertrail so that it can fetch data.
+
+```shell
+echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
+```

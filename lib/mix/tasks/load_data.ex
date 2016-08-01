@@ -28,7 +28,7 @@ defmodule Mix.Tasks.LoadData do
     Application.ensure_all_started(:httpoison)
     case opts[:reset] do
       nil -> _run(opts[:dataset], opts[:type])
-      _ -> 
+      _ ->
         reset_dataset(opts[:reset], opts[:dataset])
     end
   end
