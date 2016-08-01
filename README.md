@@ -18,6 +18,8 @@ __Create a new dataset 'mynewdataset' using the datasets/reqs.json format__
 __Load papertrail data into geckoboard dataset 'mynewdataset'__   
 `mix load_data -t papertrail -d mynewdataset`
 
+__Note : Currently, the Geckboard dataset only supports up to 400 events, and this SDK will account for this by limiting the data it will send__
+
 
 ### Examples
 ```elixir

@@ -72,8 +72,21 @@ defmodule ExGecko.Api do
   @spec find_or_create(String.t, map) :: ExGecko.response
   def find_or_create(id, fields), do: update(id, fields, false)
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data) when is_list(data), do: update(id, %{"data" => data}, true)
-  def put(id, data) when is_map(data), do: update(id, data, true)
+  def put(id, data) when is_list(data) and length(data) > 400 do
+    IO.puts "Currently the Geckoboard API can not support more than 400 events, reducing events sent from #{length(data)} to 400"
+    put(id, data |> limit_data)
+  end
+
+  def put(id, data) when is_list(data), do: put(id, %{"data" => data})
+  def put(id, data) when is_map(data) do
+    resp = update(id, data, true)
+    case resp do
+      {:ok, %{}} ->
+        count = length(data["data"])
+        {:ok, count}
+      _ -> resp
+    end
+  end
   @spec create_reqs_dataset(String.t) :: ExGecko.response
   def create_reqs_dataset(id), do: create_dataset(id, "reqs")
   @spec create_dataset(String.t, String.t) :: ExGecko.response
@@ -94,6 +107,20 @@ defmodule ExGecko.Api do
 
 
   def url, do: "https://api.geckoboard.com/"
+
+  @doc """
+    ## Examples
+
+      iex> Mix.Tasks.LoadData.limit_data(Enum.to_list(1..500)) === Enum.to_list(101..500)
+      true
+  """
+  @spec limit_data(list) :: list
+  def limit_data(events) do
+    events
+    |> Enum.reverse
+    |> Enum.slice(0..399)
+    |> Enum.reverse
+  end
 
   @doc """
   Add header with username

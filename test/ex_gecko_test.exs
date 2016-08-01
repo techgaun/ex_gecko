@@ -9,6 +9,12 @@ defmodule ExGeckoTest do
      "status" => %{"name" => "Status Code", "type" => "string"},
      "size" => %{"name" => "Request Size", "type" => "number"}
    }
+   @data %{"path" => "/api/testpath",
+          "speed" => 491,
+          "timestamp" => "2016-07-20T10:11:01Z",
+          "status" => "200",
+          "size" => 15010
+         }
 
   setup do
     name = "testset_" <> (:os.timestamp |> elem(2) |> Integer.to_string)
@@ -41,4 +47,10 @@ defmodule ExGeckoTest do
     {:ok, resp} = ExGecko.Api.create_reqs_dataset(name)
     assert resp["fields"] == @req_fields
   end
+
+  test "should put reqs data properly", %{dataset: name} do
+    {:ok, resp} = ExGecko.Api.create_reqs_dataset(name)
+    {:ok, 1} = ExGecko.Api.put(name, [@data])
+  end
+
 end

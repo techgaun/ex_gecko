@@ -16,8 +16,8 @@ defmodule Mix.Tasks.LoadData do
       # setup dataset (will erease all the previous data) using the right schema
       mix load_data -d mydataset -r reqs
 
-      # load data from papertrail (pt) into your dataset with specific arguments
-      mix load_data -t pt -d mydataset -a "search=DB Requests,time=24 hours ago"
+      # load data from papertrail (pt) into your dataset with specific arguments.  Default values for "search" and "time" will be applied
+      mix load_data -t pt -d mydataset -a "time=24 hours ago"
 
   ## Command Line Options
     * `--dataset` / `-d` - the dataset you want to load
@@ -45,7 +45,6 @@ defmodule Mix.Tasks.LoadData do
   def _run(_dataset, type, _args) when is_nil(type), do: log("No 'type' was provided, please use the --type/-t switch statement'")
   def _run(dataset, "papertrail", args) do
     events = ExGecko.Adapter.Papertrail.load_events(args)
-      |> limit_data
     put_data(dataset, events)
   end
   def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
@@ -65,25 +64,10 @@ defmodule Mix.Tasks.LoadData do
   def put_data(dataset, events) do
     log("loading #{length(events)} to #{dataset}")
     case ExGecko.Api.put(dataset, events) do
-      {:ok, %{}} ->
-        log("successfully loaded #{length(events)} events")
+      {:ok, count} ->
+        log("successfully loaded #{count} events")
       {:error, error, code} ->
         log("HTTP Error #{code} (#{error}) loading papertrail data points")
     end
   end
-
-  @doc """
-    ## Examples
-
-      iex> Mix.Tasks.LoadData.limit_data(Enum.to_list(1..500)) === Enum.to_list(101..500)
-      true
-  """
-  @spec limit_data(list) :: list
-  def limit_data(events) do
-    events
-    |> Enum.reverse
-    |> Enum.slice(0..399)
-    |> Enum.reverse
-  end
-
 end
