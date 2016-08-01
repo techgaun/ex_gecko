@@ -49,7 +49,7 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
       |> String.split(" ")
     {year, _, _} = :erlang.date
     timestamp = "#{year}-#{convert_month(Enum.at(data, 0))}-#{format_day(Enum.at(data, 1))}T#{Enum.at(data, 2)}Z"
-    path = data |> Enum.at(7) |> String.split("path=") |> Enum.at(-1) |> String.replace("\"", "") |> String.split("_=") |> Enum.at(0)
+    path = data |> Enum.at(7) |> String.split("path=") |> Enum.at(-1) |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0)
     speed = data |> Enum.at(-4) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
     status = data |> Enum.at(-3) |> String.split("status=") |> Enum.at(-1)
     size = data |> Enum.at(-2) |> String.split("bytes=") |> Enum.at(-1) |> String.to_integer
