@@ -19,11 +19,11 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
 
   def valid?(line) when is_nil(line) or line == "", do: false
   def valid?(line), do: length(String.split(line, " ")) > 10
-  
+
   @doc """
   A sample format line is this
 
-  Jul 28 13:45:47 brighterlink-api heroku/router: at=info method=GET path="/api/companies?id=1&_=1469713536888" host=api.brighterlink.io request_id=64e85251-bfe0-4f86-9e27-e3ae60fce74a fwd="199.91.127.142" dyno=web.1 connect=0ms service=41ms status=200 bytes=969 
+  Jul 28 13:45:47 brighterlink-api heroku/router: at=info method=GET path="/api/companies?id=1&_=1469713536888" host=api.brighterlink.io request_id=64e85251-bfe0-4f86-9e27-e3ae60fce74a fwd="199.91.127.142" dyno=web.1 connect=0ms service=41ms status=200 bytes=969
 
   0 -> Jul
   1 -> 28
@@ -41,7 +41,7 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
   13 -> service=41ms
   14 -> status=200
   15 -> bytes=969
-  16 -> 
+  16 ->
   """
   def parse_line(line) do
     data = String.split(line, " ")
@@ -53,10 +53,21 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
     %{"path" => path, "speed" => speed, "timestamp" => timestamp, "count" => 1, "status" => status, "size" => size}
   end
 
-
   def convert_month(month) do
     case month do
+      "Jan" -> "01"
+      "Feb" -> "02"
+      "Mar" -> "03"
+      "Apr" -> "04"
+      "May" -> "05"
+      "Jun" -> "06"
       "Jul" -> "07"
+      "Aug" -> "08"
+      "Sep" -> "09"
+      "Oct" -> "10"
+      "Nov" -> "11"
+      "Dec" -> "12"
+      _ -> ":error"
     end
   end
 end
