@@ -66,6 +66,7 @@ defmodule Mix.Tasks.LoadData do
 
   def put_data(_dataset, events) when length(events) == 0, do: log("No events to load")
   def put_data(dataset, events) do
+    IO.inspect events
     log("loading #{length(events)} events to #{dataset}")
     case ExGecko.Api.put(dataset, events) do
       {:ok, count} ->

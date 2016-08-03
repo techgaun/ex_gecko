@@ -64,6 +64,23 @@ defmodule ExGecko.Adapter.Heroku do
   def _process_metric("sample#memory_pgpgin=" <> memory_pgpgin), do: %{"memory_pgpgin" => int_value(memory_pgpgin)}
   def _process_metric("sample#memory_pgpgout=" <> memory_pgpgout), do: %{"memory_pgpgout" => int_value(memory_pgpgout)}
   def _process_metric("sample#memory_quota=" <> memory_quota), do: %{"memory_quota" => float_value(memory_quota)}
+  def _process_metric("source=" <> source), do: %{"source" => source}
+  # def _process_metric("sample#current_transaction=" <> current_transaction), do: %{"current_transaction" => current_transaction}
+  def _process_metric("sample#db_size=" <> db_size), do: %{"db_size" => bytes_to_mb(db_size)}
+  # def _process_metric("sample#tables=" <> tables_count), do: %{"tables_count" => String.to_integer(tables_count)}
+  def _process_metric("sample#active-connections=" <> active_connections), do: %{"active_connections" => String.to_integer(active_connections)}
+  def _process_metric("sample#waiting-connections=" <> waiting_connections), do: %{"waiting_connections" => String.to_integer(waiting_connections)}
+  def _process_metric("sample#index-cache-hit-rate=" <> index_cache_hit_rate), do: %{"index_cache_hit_rate" => String.to_float(index_cache_hit_rate)}
+  # def _process_metric("sample#table-cache-hit-rate=" <> table_cache_hit_rate), do: %{"table_cache_hit_rate" => String.to_float(table_cache_hit_rate)}
+  # def _process_metric("sample#load-avg-1m=" <> load_1m), do: %{"load_1m" => String.to_float(load_1m)}
+  def _process_metric("sample#load-avg-5m=" <> load_5m), do: %{"load_5m" => String.to_float(load_5m)}
+  # def _process_metric("sample#load-avg-15m=" <> load_15m), do: %{"load_15m" => String.to_float(load_15m)}
+  # def _process_metric("sample#read-iops=" <> read_iops), do: %{"read_iops" => String.to_integer(read_iops)}
+  # def _process_metric("sample#write-iops=" <> write_iops), do: %{"write_iops" => String.to_integer(write_iops)}
+  def _process_metric("sample#memory-total=" <> memory_total), do: %{"memory_total" => kb_to_mb(memory_total)}
+  def _process_metric("sample#memory-free=" <> memory_free), do: %{"memory_free" => kb_to_mb(memory_free)}
+  # def _process_metric("sample#memory-cached=" <> memory_cache), do: %{"memory_cache" => kb_to_mb(memory_cache)}
+  def _process_metric("sample#memory-postgres=" <> memory_postgres), do: %{"memory_postgres" => kb_to_mb(memory_postgres)}
   def _process_metric(_), do: %{}
 
   def _timestamp(data, line) do
@@ -71,6 +88,16 @@ defmodule ExGecko.Adapter.Heroku do
     Map.put(data, "timestamp", ts)
   end
 
+  defp bytes_to_mb(str) do
+    str
+    |> float_value
+    |> Kernel./(1048576)
+  end
+  defp kb_to_mb(str) do
+    str
+    |> float_value
+    |> Kernel./(1024)
+  end
   defp float_value(str) do
     {val, _} = Float.parse(str)
     val
