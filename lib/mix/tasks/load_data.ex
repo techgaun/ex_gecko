@@ -47,6 +47,15 @@ defmodule Mix.Tasks.LoadData do
     events = ExGecko.Adapter.Papertrail.load_events(args)
     put_data(dataset, events)
   end
+  def _run(dataset, "heroku", args) do
+    dataset
+    |> String.split(",")
+    |> Enum.each(fn x ->
+      "heroku." <> type = x
+      events = ExGecko.Adapter.Heroku.load_events(args)
+      put_data(x, events)
+    end)
+  end
   def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
   def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")
 
@@ -58,16 +67,16 @@ defmodule Mix.Tasks.LoadData do
     log("creating dataset '#{dataset}' using schema 'reqs'")
     {:ok, %{}} = ExGecko.Api.create_reqs_dataset(dataset)
   end
-  def reset_dataset(type, _dataset), do: log("Unkonwn dataset schema '#{type}'")
+  def reset_dataset(type, _dataset), do: log("Unknown dataset schema '#{type}'")
 
   def put_data(_dataset, events) when length(events) == 0, do: log("No events to load")
   def put_data(dataset, events) do
-    log("loading #{length(events)} to #{dataset}")
+    log("loading #{length(events)} events to #{dataset}")
     case ExGecko.Api.put(dataset, events) do
       {:ok, count} ->
         log("successfully loaded #{count} events")
       {:error, error, code} ->
-        log("HTTP Error #{code} (#{error}) loading papertrail data points")
+        log("HTTP Error #{code} (#{error}) loading data points")
     end
   end
 end

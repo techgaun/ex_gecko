@@ -8,7 +8,7 @@
       "type": "number",
       "name": "Load Average of Last Five Minutes"
     },
-    "size": {
+    "15m": {
       "type": "number",
       "name": "Load Average of Last Fifteen Minutes"
     },
