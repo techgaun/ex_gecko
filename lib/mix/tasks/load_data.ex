@@ -17,13 +17,13 @@ defmodule Mix.Tasks.LoadData do
       mix load_data -d mydataset -r reqs
 
       # load data from papertrail (pt) into your dataset with specific arguments.  Default values for "search" and "time" will be applied
-      mix load_data -t pt -d mydataset -a "time=24 hours ago"
+      mix load_data -t pt -d mydataset -a "time=24 hours ago,search=My Search"
 
   ## Command Line Options
     * `--dataset` / `-d` - the dataset you want to load
     * `--type` / `-t` - type of data you want to retrieve and load, currently only 'papertrail' is supported
     * `--reset` / `-r` - this will recreate the dataset using the specific schema
-    * `--args` / `-a` - arguments to be passed to the adapter
+    * `--args` / `-a` - arguments to be passed to the adapter (comma-separated)
   """
 
   @doc false

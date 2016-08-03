@@ -14,16 +14,30 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
     load_events(new_opts)
   end
 
+  def build_args(%{"search" => search, "time" => time} = opts) do
+    args = ["-j", "-S", search, "--min-time", "'#{time}'"]
+    config = opts["config"]
+    if config do
+      IO.puts "using config file #{config}"
+      args ++ ["-c", config]
+    else
+      args
+    end
+  end
+
   def load_events(%{"search" => search, "time" => time} = opts) do
     Application.ensure_all_started(:porcelain)
-    case Porcelain.exec("papertrail", ["-S", search, "--min-time", "'#{time}'"]) do
+    IO.puts "Pulling papertrail logs"
+    case Porcelain.exec("papertrail", build_args(opts)) do
       %{status: 0, out: output} ->
         lines = output |> String.split("\n")
-        for line <- lines, valid?(line), into: [], do: parse_line(line)
+        for line <- lines,
+            data = decode_line(line),
+            valid?(data), into: [], do: process_data(data)
       %{status: status, err: message} ->
         IO.puts "error executing command, #{status}, #{message}"
         []
-      end
+    end
   end
 
   def load_events(opts) do
@@ -31,81 +45,58 @@ papertrail -S "API Requests" --min-time '120 minutes ago'
     load_events(Map.merge(%{"time" => "72 hours ago", "search" => "API Requests"}, opts))
   end
 
-  def valid?(line) when is_nil(line) or line == "", do: false
-  def valid?(line), do: length(String.split(line, " ")) > 10
+  def decode_line(line) when is_nil(line) or line == "", do: nil
+  def decode_line(line) do
+    case Poison.decode(line) do
+      {:ok, data} -> data
+      _ -> nil
+    end
+  end
+
+  def valid?(data) when is_nil(data), do: false
+  def valid?(data) when not is_map(data), do: false
+  def valid?(data), do: Map.has_key?(data, "message") && Map.has_key?(data, "received_at")
 
   @doc """
-  A sample format line is this
+  A sample format of the json object is like this.  Note the "message" section
 
-  Jul 28 13:45:47 brighterlink-api heroku/router: at=info method=GET path="/api/companies?id=1&_=1469713536888" host=api.brighterlink.io request_id=64e85251-bfe0-4f86-9e27-e3ae60fce74a fwd="199.91.127.142" dyno=web.1 connect=0ms service=41ms status=200 bytes=969
+  %{
+    "display_received_at" => "Aug 02 19:14:29", 
+    "facility" => "Local3",
+    "generated_at" => "2016-08-02T19:14:29Z", 
+    "hostname" => "brighterlink-api",
+    "id" => "697210962448814080",
+    "message" => "at=info method=GET path=\"/api/companies?_=1470165266333\" host=api.brighterlink.io request_id=6c1499a0-7e13-47ce-9efb-aa0a8dc9d7ea fwd=\"199.91.127.142\" dyno=web.1 connect=0ms service=94ms status=200 bytes=3165 ",
+    "program" => "heroku/router",
+    "received_at" => "2016-08-02T19:14:29Z",
+    "severity" => "Info",
+    "source_id" => 242534344,
+    "source_ip" => "54.145.114.143",
+    "source_name" => "brighterlink-api"
+    }
 
-  0 -> Jul
-  1 -> 28
-  2 -> 13:45:47
-  3 -> brighterlink-api
-  4 -> heroku/router:
-  5 -> at=info
-  6 -> method=GET
-  7 -> path="/api/companies?id=1&_=1469713536888"
-  8 -> host=api.brighterlink.io
-  9 -> request_id=64e85251-bfe0-4f86-9e27-e3ae60fce74a
-  10 -> fwd="199.91.127.142"
-  11 -> dyno=web.1
-  12 -> connect=0ms
-  13 -> service=41ms
-  14 -> status=200
-  15 -> bytes=969
-  16 ->
+    "message" is a string broken up in this way
+
+      at=info
+      method=GET
+      path=\"/api/companies?_=1470165266333\"
+      host=api.brighterlink.io
+      request_id=6c1499a0-7e13-47ce-9efb-aa0a8dc9d7ea
+      fwd=\"199.91.127.142\"
+      dyno=web.1
+      connect=0ms
+      service=94ms
+      status=200
+      bytes=3165"
   """
-  def parse_line(line) do
-    data = line
-      |> String.replace("  ", " ")
-      |> String.split(" ")
-    {year, _, _} = :erlang.date
-    timestamp = "#{year}-#{convert_month(Enum.at(data, 0))}-#{format_day(Enum.at(data, 1))}T#{Enum.at(data, 2)}Z"
-    path = data |> Enum.at(7) |> String.split("path=") |> Enum.at(-1) |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0)
-    speed = data |> Enum.at(-4) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
-    status = data |> Enum.at(-3) |> String.split("status=") |> Enum.at(-1)
-    size = data |> Enum.at(-2) |> String.split("bytes=") |> Enum.at(-1) |> String.to_integer
+  def process_data(data) do
+    timestamp = data["received_at"]
+    message = data["message"] |> String.strip
+    msg_data = message |> String.split(" ")
+    path = msg_data |> Enum.at(2) |> String.split("path=") |> Enum.at(-1) |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0)
+    speed = msg_data |> Enum.at(-3) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
+    status = msg_data |> Enum.at(-2) |> String.split("status=") |> Enum.at(-1)
+    size = msg_data |> Enum.at(-1) |> String.split("bytes=") |> Enum.at(-1) |> String.to_integer
     %{"path" => path, "speed" => speed, "timestamp" => timestamp, "status" => status, "size" => size}
   end
-
-  def convert_month(month) do
-    case month do
-      "Jan" -> "01"
-      "Feb" -> "02"
-      "Mar" -> "03"
-      "Apr" -> "04"
-      "May" -> "05"
-      "Jun" -> "06"
-      "Jul" -> "07"
-      "Aug" -> "08"
-      "Sep" -> "09"
-      "Oct" -> "10"
-      "Nov" -> "11"
-      "Dec" -> "12"
-      _ -> ":error"
-    end
-  end
-
-  @doc """
-  ## Examples
-
-      iex> ExGecko.Adapter.Papertrail.format_day("1")
-      "01"
-
-      iex> ExGecko.Adapter.Papertrail.format_day("11")
-      "11"
-  """
-  @spec format_day(String.t) :: String.t
-  def format_day(day) when is_bitstring(day) do
-    case String.length(day) do
-      1 ->
-        "0#{day}"
-
-      _ ->
-        day
-    end
-  end
-  def format_day(day), do: day
 end
