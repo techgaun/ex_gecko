@@ -15,7 +15,7 @@ defmodule ExGecko.Adapter.Heroku do
 
   def load_events(%{"app" => app, "lines" => lines, "type" => type} = opts) do
     Application.ensure_all_started(:porcelain)
-    case Porcelain.exec("heroku", ["logs", "--app", app, "--num", "#{lines}"]) do
+    case Porcelain.exec("heroku", ["logs", "--app", app, "--num", lines]) do
       %{status: 0, out: output} ->
         lines = output |> String.split("\n")
         for line <- lines, valid?(line, type), into: [], do: parse_line(line)
@@ -27,7 +27,7 @@ defmodule ExGecko.Adapter.Heroku do
 
   def load_events(opts) do
     # set default search/time values
-    load_events(Map.merge(%{"app" => "brighterlink-api", "lines" => 100, "type" => "load"}, opts))
+    load_events(Map.merge(%{"app" => "brighterlink-api", "lines" => "100", "type" => "load"}, opts))
   end
 
   def valid?(line, _) when is_nil(line) or line === "", do: false
@@ -85,7 +85,7 @@ defmodule ExGecko.Adapter.Heroku do
 
   def _timestamp(data, line) do
     ts = line |> String.slice(0, 19)
-    Map.put(data, "timestamp", ts)
+    Map.put(data, "timestamp", "#{ts}Z")
   end
 
   defp bytes_to_mb(str) do
