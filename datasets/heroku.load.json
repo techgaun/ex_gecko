@@ -16,6 +16,10 @@
       "type" : "string",
       "name" : "Dyno Identifier"
     },
+    "source" : {
+      "type" : "string",
+      "name" : "Source Identifier"
+    },
     "timestamp": {
       "type": "datetime",
       "name": "Timestamp"
