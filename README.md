@@ -51,10 +51,27 @@ A key feature is the ability of the sdk to parse data from known sources of info
 
 * Papertrail - integrates with the papertrail cli to pump out log data, specifically needed for the reqs dataset.
 
+* Heroku - integrates with the heroku cli to pump out CPU load, memory stats and postgres DB stats
+
 #### Papertrail
 
 The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/papertrail-cli) to be installed. Once installed, make sure you configure papertrail so that it can fetch data.
 
 ```shell
 echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
+```
+
+#### Heroku
+
+The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapters as below:
+
+```shell
+mix load_data -d heroku-api.load -r heroku.load # create dataset for load
+mix load_data -d heroku-api.memory -r heroku.memory # create dataset for memory
+mix load_data -d heroku-api-db.stats -r heroku.db # create dataset for db stats
+
+# run the actual loading of data as below:
+mix load_data -d heroku-api.load -t heroku -a type=load
+mix load_data -d heroku-api.memory -t heroku -a type=memory
+mix load_data -d heroku-api-db.stats -t heroku -a "type=db"
 ```

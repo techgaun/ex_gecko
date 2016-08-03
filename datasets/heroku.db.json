@@ -1,0 +1,44 @@
+{
+  "fields": {
+    "db_size": {
+      "type": "number",
+      "name": "Current DB size"
+    },
+    "active_connections" : {
+      "type" : "number",
+      "name" : "Active connections"
+    },
+    "waiting_connections" : {
+      "type" : "number",
+      "name" : "Waiting connections"
+    },
+    "index_cache_hit_rate" : {
+      "type" : "number",
+      "name" : "Ratio of queries that used an index"
+    },
+    "load_5m" : {
+      "type" : "number",
+      "name" : "Load average of db server last five minutes"
+    },
+    "memory_total" : {
+      "type" : "number",
+      "name" : "Total memory in use"
+    },
+    "memory_free" : {
+      "type" : "number",
+      "name" : "Available free memory"
+    },
+    "memory_postgres" : {
+      "type" : "number",
+      "name" : "Memory used by postgres"
+    },
+    "source" : {
+      "type" : "string",
+      "name" : "DB Identifier"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "name": "Timestamp"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "fields": {
+    "load_1m": {
+      "type": "number",
+      "name": "Load Average of Last One Minute"
+    },
+    "load_5m": {
+      "type": "number",
+      "name": "Load Average of Last Five Minutes"
+    },
+    "load_15m": {
+      "type": "number",
+      "name": "Load Average of Last Fifteen Minutes"
+    },
+    "dyno" : {
+      "type" : "string",
+      "name" : "Dyno Identifier"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "name": "Timestamp"
+    }
+  }
+}

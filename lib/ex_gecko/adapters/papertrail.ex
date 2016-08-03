@@ -1,9 +1,8 @@
 defmodule ExGecko.Adapter.Papertrail do
-
-@moduledoc """
-Interacts with papertrail cli to get latest logs, so that we can send to geckobard
-papertrail -S "API Requests" --min-time '120 minutes ago'
-"""
+  @moduledoc """
+  Interacts with papertrail cli to get latest logs, so that we can send to geckobard
+  papertrail -S "API Requests" --min-time '120 minutes ago'
+  """
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
   def load_events(opts) when is_bitstring(opts) do
