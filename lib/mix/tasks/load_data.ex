@@ -51,13 +51,6 @@ defmodule Mix.Tasks.LoadData do
     dataset
     |> String.split(",")
     |> Enum.each(fn x ->
-      "heroku." <> type = x
-      args = case args |> is_bitstring do
-        true ->
-          args = "#{args},type=#{type}"
-        false ->
-          "type=#{type}"
-      end
       events = ExGecko.Adapter.Heroku.load_events(args)
       put_data(x, events)
     end)
