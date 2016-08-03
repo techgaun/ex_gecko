@@ -47,14 +47,7 @@ defmodule ExGecko.Adapter.Heroku do
       |> String.split(" ")
     data_map = data
       |> Enum.reduce(%{}, fn (x, acc) ->
-        metric = _process_metric(x)
-        case metric do
-          %{} ->
-            Map.merge(acc, metric)
-
-          _ ->
-            acc
-        end
+        Map.merge(acc, _process_metric(x))
       end)
       |> _timestamp(line)
   end
@@ -63,10 +56,27 @@ defmodule ExGecko.Adapter.Heroku do
   def _process_metric("sample#load_avg_1m=" <> load_1m), do: %{"load_1m" => String.to_float(load_1m)}
   def _process_metric("sample#load_avg_5m=" <> load_5m), do: %{"load_5m" => String.to_float(load_5m)}
   def _process_metric("sample#load_avg_15m=" <> load_15m), do: %{"load_15m" => String.to_float(load_15m)}
-  def _process_metric(_), do: nil
+  def _process_metric("sample#load_avg_15m=" <> load_15m), do: %{"load_15m" => String.to_float(load_15m)}
+  def _process_metric("sample#memory_total=" <> memory_total), do: %{"memory_total" => float_value(memory_total)}
+  def _process_metric("sample#memory_rss=" <> memory_rss), do: %{"memory_rss" => float_value(memory_rss)}
+  def _process_metric("sample#memory_cache=" <> memory_cache), do: %{"memory_cache" => float_value(memory_cache)}
+  def _process_metric("sample#memory_swap=" <> memory_swap), do: %{"memory_swap" => float_value(memory_swap)}
+  def _process_metric("sample#memory_pgpgin=" <> memory_pgpgin), do: %{"memory_pgpgin" => int_value(memory_pgpgin)}
+  def _process_metric("sample#memory_pgpgout=" <> memory_pgpgout), do: %{"memory_pgpgout" => int_value(memory_pgpgout)}
+  def _process_metric("sample#memory_quota=" <> memory_quota), do: %{"memory_quota" => float_value(memory_quota)}
+  def _process_metric(_), do: %{}
 
   def _timestamp(data, line) do
     ts = line |> String.slice(0, 19)
     Map.put(data, "timestamp", ts)
+  end
+
+  defp float_value(str) do
+    {val, _} = Float.parse(str)
+    val
+  end
+  def int_value(str) do
+    {val, _} = Integer.parse(str)
+    val
   end
 end

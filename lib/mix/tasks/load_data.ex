@@ -48,12 +48,8 @@ defmodule Mix.Tasks.LoadData do
     put_data(dataset, events)
   end
   def _run(dataset, "heroku", args) do
-    dataset
-    |> String.split(",")
-    |> Enum.each(fn x ->
-      events = ExGecko.Adapter.Heroku.load_events(args)
-      put_data(x, events)
-    end)
+    events = ExGecko.Adapter.Heroku.load_events(args)
+    put_data(dataset, events)
   end
   def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
   def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")

@@ -1,6 +1,6 @@
 {
   "fields": {
-    "memory_used_total": {
+    "memory_total": {
       "type": "number",
       "name": "Total memory used"
     },
