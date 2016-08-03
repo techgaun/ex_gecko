@@ -71,7 +71,7 @@ mix load_data -d heroku-api.memory -r heroku.memory # create dataset for memory
 mix load_data -d heroku-api-db.stats -r heroku.db # create dataset for db stats
 
 # run the actual loading of data as below:
-mix load_data -d heroku-api.load -t heroku -a type=load
+mix load_data -d heroku-api.load -t heroku -a type=load,lines=1000
 mix load_data -d heroku-api.memory -t heroku -a type=memory
 mix load_data -d heroku-api-db.stats -t heroku -a "type=db"
 ```
