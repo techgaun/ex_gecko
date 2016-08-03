@@ -1,14 +1,14 @@
 {
   "fields": {
-    "1m": {
+    "load_1m": {
       "type": "number",
       "name": "Load Average of Last One Minute"
     },
-    "5m": {
+    "load_5m": {
       "type": "number",
       "name": "Load Average of Last Five Minutes"
     },
-    "15m": {
+    "load_15m": {
       "type": "number",
       "name": "Load Average of Last Fifteen Minutes"
     },

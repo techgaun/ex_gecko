@@ -60,9 +60,9 @@ defmodule ExGecko.Adapter.Heroku do
   end
 
   def _process_metric("dyno=heroku." <> dyno), do: %{"dyno" => dyno}
-  def _process_metric("sample#load_avg_1m=" <> load_1m), do: %{"1m" => String.to_float(load_1m)}
-  def _process_metric("sample#load_avg_5m=" <> load_5m), do: %{"5m" => String.to_float(load_5m)}
-  def _process_metric("sample#load_avg_15m=" <> load_15m), do: %{"15m" => String.to_float(load_15m)}
+  def _process_metric("sample#load_avg_1m=" <> load_1m), do: %{"load_1m" => String.to_float(load_1m)}
+  def _process_metric("sample#load_avg_5m=" <> load_5m), do: %{"load_5m" => String.to_float(load_5m)}
+  def _process_metric("sample#load_avg_15m=" <> load_15m), do: %{"load_15m" => String.to_float(load_15m)}
   def _process_metric(_), do: nil
 
   def _timestamp(data, line) do

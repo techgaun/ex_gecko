@@ -52,6 +52,12 @@ defmodule Mix.Tasks.LoadData do
     |> String.split(",")
     |> Enum.each(fn x ->
       "heroku." <> type = x
+      args = case args |> is_bitstring do
+        true ->
+          args = "#{args},type=#{type}"
+        false ->
+          "type=#{type}"
+      end
       events = ExGecko.Adapter.Heroku.load_events(args)
       put_data(x, events)
     end)
@@ -60,12 +66,12 @@ defmodule Mix.Tasks.LoadData do
   def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")
 
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
-  def reset_dataset("reqs", dataset) do
+  def reset_dataset(schema, dataset) do
     log("Deleting the dataset '#{dataset}'")
     # delete will fail if it doesn't exist, but continue so we can create the new dataset
     ExGecko.Api.delete(dataset)
-    log("creating dataset '#{dataset}' using schema 'reqs'")
-    {:ok, %{}} = ExGecko.Api.create_reqs_dataset(dataset)
+    log("creating dataset '#{dataset}' using schema '#{schema}'")
+    {:ok, %{}} = ExGecko.Api.create_dataset(dataset, schema)
   end
   def reset_dataset(type, _dataset), do: log("Unknown dataset schema '#{type}'")
 
