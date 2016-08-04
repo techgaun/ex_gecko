@@ -17,7 +17,11 @@ defmodule ExGecko.Api do
   """
   @spec process_url(String.t) :: String.t
   def process_url(path) do
-    "#{url}#{path}"
+    if String.starts_with?(path, "http") do
+      path
+    else
+      "https://api.geckoboard.com/#{path}"
+    end
   end
 
   @doc """
@@ -87,6 +91,53 @@ defmodule ExGecko.Api do
       _ -> resp
     end
   end
+
+  @spec push(String.t, map) :: ExGecko.response
+  @doc """
+  Push API to Geckoboard, which is a POST with this data format
+
+  {
+    "api_key": "222f66ab58130a8ece8ccd7be57f12e2",
+    "data": {
+       "item": [
+          { "text": "Visitors", "value": 4223 },
+          { "text": "", "value": 238 }
+        ]
+    }
+  }
+  """
+  def push(widget_key, data) do
+    api_key = System.get_env("GECKO_API_KEY")
+    post_data = %{"api_key" => api_key, "data" => data} |> Poison.encode!
+    widget_key
+    |> build_url(:push)
+    |> Api.post(post_data, @content_type)
+    |> Parser.parse
+  end
+
+  @doc """
+  Monitor format expected from geckoboard
+
+  {
+    "status": "Up",
+    "downTime": "9 days ago",
+    "responseTime": "593 ms"
+  }
+
+  {
+    "status": "Down",
+    "downTime": "2 days ago",
+    "responseTime": "593 ms"
+  }
+  """
+  def push_monitor(widget_key, status, down_time \\ "", response_time \\ "") do
+    push(widget_key, %{"status" => format_status(status), "downTime" => down_time, "responseTime" => response_time})
+  end
+
+  def format_status(:up), do: "Up"
+  def format_status(:down), do: "Down"
+  def format_status(status) when is_bitstring(status), do: String.capitalize(status)
+
   @spec create_reqs_dataset(String.t) :: ExGecko.response
   def create_reqs_dataset(id), do: create_dataset(id, "papertrail.reqs")
   @spec create_dataset(String.t, String.t) :: ExGecko.response
@@ -104,9 +155,7 @@ defmodule ExGecko.Api do
   def build_url(id), do: "/datasets/#{id}"
   def build_url(id, true), do: build_url(id) <> "/data"
   def build_url(id, false), do: build_url(id)
-
-
-  def url, do: "https://api.geckoboard.com/"
+  def build_url(id, :push), do: "https://push.geckoboard.com/v1/send/#{id}"
 
   @doc """
     ## Examples
@@ -126,16 +175,16 @@ defmodule ExGecko.Api do
   Add header with username
   and also the user agent
   """
-  def request_header(headers) do
+  def auth_header do
     api_key = System.get_env("GECKO_API_KEY")
     if is_nil(api_key) do
       raise "Geckoboard API Key is missing"
     else
       api_key = api_key <> ":"
-      headers ++ [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
+      [{"Authorization", "Basic #{Base.encode64(api_key)}"}]
     end
   end
 
-  def request_header, do: request_header(@user_agent)
+  def request_header, do: @user_agent ++ auth_header
   def request_header_content_type, do: @content_type ++ request_header
 end
