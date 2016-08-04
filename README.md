@@ -63,6 +63,14 @@ The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/p
 echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
 ```
 
+Now you can use the mix load_data task to load papertrail logs:
+
+```shell
+mix load_data -d api.reqs -r papertrail.reqs # create dataset for papertrail request logs
+
+mix load_data -d api-reqs -t papertrail # load data to datasets
+```
+
 #### Heroku
 
 The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapter as below:
