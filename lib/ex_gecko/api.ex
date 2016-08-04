@@ -88,7 +88,7 @@ defmodule ExGecko.Api do
     end
   end
   @spec create_reqs_dataset(String.t) :: ExGecko.response
-  def create_reqs_dataset(id), do: create_dataset(id, "reqs")
+  def create_reqs_dataset(id), do: create_dataset(id, "papertrail.reqs")
   @spec create_dataset(String.t, String.t) :: ExGecko.response
   def create_dataset(id, type \\ "reqs") do
     {:ok, fields} = "datasets/#{type}.json" |> File.read
