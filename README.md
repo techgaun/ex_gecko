@@ -24,7 +24,7 @@ __Note : Currently, the Geckboard dataset only supports up to 400 events, and th
 ### Examples
 ```elixir
 
-# Ensure authention works
+# Ensure authentication works
 ExGecko.Api.ping
 
 # Find or create the dataset   
@@ -51,6 +51,8 @@ A key feature is the ability of the sdk to parse data from known sources of info
 
 * Papertrail - integrates with the papertrail cli to pump out log data, specifically needed for the reqs dataset.
 
+* Heroku - integrates with the heroku cli to pump out CPU load, memory stats and postgres DB stats
+
 #### Papertrail
 
 The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/papertrail-cli) to be installed. Once installed, make sure you configure papertrail so that it can fetch data.
@@ -58,3 +60,26 @@ The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/p
 ```shell
 echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
 ```
+
+#### Heroku
+
+The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapter as below:
+
+```shell
+mix load_data -d heroku-api.load -r heroku.load # create dataset for load
+mix load_data -d heroku-api.memory -r heroku.memory # create dataset for memory
+mix load_data -d heroku-api-db.stats -r heroku.db # create dataset for db stats
+
+# run the actual loading of data as below:
+mix load_data -d heroku-api.load -t heroku -a type=load,lines=1000
+mix load_data -d heroku-api.memory -t heroku -a type=memory,app=your-heroku-app
+mix load_data -d heroku-api-db.stats -t heroku -a "type=db"
+```
+
+The heroku adapter supports following comma separated lists of arguments:
+
+* `type` : One of `db`, `db-server`, `pg-backup`, `memory` and `load`
+* `app` : The heroku app you are wishing to pump logs from
+* `lines` : Number of lines to pull from logs (not applicable for `pg-backup`)
+
+The available dataset names that can be passed as `-r` argument: `heroku.db`, `heroku.db-server`, `heroku.load`, `heroku.memory`, `heroku.pg-backup`.

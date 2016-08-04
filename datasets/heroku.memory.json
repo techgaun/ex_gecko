@@ -1,0 +1,44 @@
+{
+  "fields": {
+    "memory_total": {
+      "type": "number",
+      "name": "Total memory used"
+    },
+    "memory_rss": {
+      "type": "number",
+      "name": "Memory held in RAM"
+    },
+    "memory_cache": {
+      "type": "number",
+      "name": "Memory used as disk cache."
+    },
+    "memory_swap" : {
+      "type" : "number",
+      "name" : "Memory stored on disk."
+    },
+    "memory_quota" : {
+      "type" : "number",
+      "name" : "Available Quota"
+    },
+    "memory_pgpgout" : {
+      "type" : "number",
+      "name" : "Cumulative pages count written to disk"
+    },
+    "memory_pgpgin" : {
+      "type" : "number",
+      "name" : "Cumulative pages count read from disk"
+    },
+    "dyno" : {
+      "type" : "string",
+      "name" : "Dyno Identifier"
+    },
+    "source" : {
+      "type" : "string",
+      "name" : "Source Identifier"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "name": "Timestamp"
+    }
+  }
+}

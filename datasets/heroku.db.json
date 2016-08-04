@@ -1,0 +1,44 @@
+{
+  "fields": {
+    "current_transaction": {
+      "type": "string",
+      "name": "current transaction ID"
+    },
+    "db_size": {
+      "type": "number",
+      "name": "Current DB size"
+    },
+    "tables_count": {
+      "type": "number",
+      "name": "Number of tables."
+    },
+    "active_connections" : {
+      "type" : "number",
+      "name" : "Active connections"
+    },
+    "waiting_connections" : {
+      "type" : "number",
+      "name" : "Waiting connections"
+    },
+    "index_cache_hit_rate" : {
+      "type" : "number",
+      "name" : "Ratio of queries that used an index"
+    },
+    "table_cache_hit_rate" : {
+      "type" : "number",
+      "name" : "Ratio of table lookups served from shared buffer cache"
+    },
+    "memory_postgres" : {
+      "type" : "number",
+      "name" : "Memory used by postgres"
+    },
+    "source" : {
+      "type" : "string",
+      "name" : "DB Identifier"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "name": "Timestamp"
+    }
+  }
+}
