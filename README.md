@@ -80,6 +80,6 @@ The heroku adapter supports following comma separated lists of arguments:
 
 * `type` : One of `db`, `db-server`, `pg-backup`, `memory` and `load`
 * `app` : The heroku app you are wishing to pump logs from
-* `lines` : Number of lines to pull from logs (not applicable for `pg:backups`)
+* `lines` : Number of lines to pull from logs (not applicable for `pg-backup`)
 
-The available dataset names that can be passed as `-r` argument: `heroku.db`, `heroku.db-server`, `heroku.load`, `heroku.memory`, `heroku.pg-backup`
+The available dataset names that can be passed as `-r` argument: `heroku.db`, `heroku.db-server`, `heroku.load`, `heroku.memory`, `heroku.pg-backup`.
