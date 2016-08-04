@@ -43,7 +43,9 @@ ExGecko.Api.create_dataset("mynewdataset", "reqs")
 
 ### Datasets
 
-This SDK takes advantage of a new API provided by GeckoBoard, which allows for much easier data manipulation and charting.  By creating an adapter (see below), we can interact with a variety of services, and transform them to a simple format that we can send to the datasets api.  This will then allow us to create any charts.  An example of this can be seen on BrighterLink's public [geckoboard](https://brighterlink.geckoboard.com/loop/777165AF8CFDA675)
+This SDK takes advantage of a new API provided by GeckoBoard, which allows for much easier data manipulation and charting. By creating an adapter (see below), we can interact with a variety of services, and transform them to a simple format that we can send to the datasets api. This will then allow us to create any charts.  An example of this can be seen on BrighterLink's public [geckoboard](https://brighterlink.geckoboard.com/loop/777165AF8CFDA675).
+
+There are number of datasets available right now. You can read more about our datasets [here](datasets/README.md)
 
 ### Adapters
 
@@ -59,6 +61,14 @@ The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/p
 
 ```shell
 echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
+```
+
+Now you can use the mix load_data task to load papertrail logs:
+
+```shell
+mix load_data -d api.reqs -r papertrail.reqs # create dataset for papertrail request logs
+
+mix load_data -d api-reqs -t papertrail # load data to datasets
 ```
 
 #### Heroku
