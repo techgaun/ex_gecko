@@ -24,7 +24,7 @@ __Note : Currently, the Geckboard dataset only supports up to 400 events, and th
 ### Examples
 ```elixir
 
-# Ensure authention works
+# Ensure authentication works
 ExGecko.Api.ping
 
 # Find or create the dataset   
@@ -63,7 +63,7 @@ echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
 
 #### Heroku
 
-The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapters as below:
+The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapter as below:
 
 ```shell
 mix load_data -d heroku-api.load -r heroku.load # create dataset for load
