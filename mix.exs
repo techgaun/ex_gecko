@@ -54,7 +54,8 @@ defmodule ExGecko.Mixfile do
         "Bruce Wang"
       ],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/Brightergy/ex_gecko"}
+      links: %{"GitHub" => "https://github.com/Brightergy/ex_gecko"},
+      files: ~w(config datasets lib logo mix.exs README.md)
     ]
   end
 end
