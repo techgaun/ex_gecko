@@ -102,7 +102,6 @@ defmodule ExGecko.Adapter.Heroku do
   def _process_metric("sample#load_avg_1m=" <> load_1m), do: %{"load_1m" => float_value(load_1m)}
   def _process_metric("sample#load_avg_5m=" <> load_5m), do: %{"load_5m" => float_value(load_5m)}
   def _process_metric("sample#load_avg_15m=" <> load_15m), do: %{"load_15m" => float_value(load_15m)}
-  def _process_metric("sample#load_avg_15m=" <> load_15m), do: %{"load_15m" => float_value(load_15m)}
   def _process_metric("sample#memory_total=" <> memory_total), do: %{"memory_total" => float_value(memory_total)}
   def _process_metric("sample#memory_rss=" <> memory_rss), do: %{"memory_rss" => float_value(memory_rss)}
   def _process_metric("sample#memory_cache=" <> memory_cache), do: %{"memory_cache" => float_value(memory_cache)}
