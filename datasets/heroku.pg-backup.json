@@ -1,0 +1,24 @@
+{
+  "fields": {
+    "backup_id": {
+      "type": "string",
+      "name": "Backup ID"
+    },
+    "backup_start_time" : {
+      "type" : "datetime",
+      "name" : "Backup start time"
+    },
+    "backup_end_time" : {
+      "type" : "datetime",
+      "name" : "Backup end time"
+    },
+    "backup_size" : {
+      "type" : "number",
+      "name" : "Size of backup"
+    },
+    "backup_db" : {
+      "type" : "string",
+      "name" : "Database whose backup was created"
+    }
+  }
+}

@@ -75,3 +75,11 @@ mix load_data -d heroku-api.load -t heroku -a type=load,lines=1000
 mix load_data -d heroku-api.memory -t heroku -a type=memory,app=your-heroku-app
 mix load_data -d heroku-api-db.stats -t heroku -a "type=db"
 ```
+
+The heroku adapter supports following comma separated lists of arguments:
+
+* `type` : One of `db`, `db-server`, `pg-backup`, `memory` and `load`
+* `app` : The heroku app you are wishing to pump logs from
+* `lines` : Number of lines to pull from logs (not applicable for `pg:backups`)
+
+The available dataset names that can be passed as `-r` argument: `heroku.db`, `heroku.db-server`, `heroku.load`, `heroku.memory`, `heroku.pg-backup`
