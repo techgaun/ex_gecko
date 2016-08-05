@@ -1,7 +1,15 @@
 defmodule ExGecko.Adapter.Papertrail do
   @moduledoc """
   Interacts with papertrail cli to get latest logs, so that we can send to geckobard
-  papertrail -S "API Requests" --min-time '120 minutes ago'
+
+  Papertrail adapter accepts following arguments:
+
+  * `search` : Search terms eg. `API Requests`
+  * `time` : Earliest time to search from eg. `2 hours ago`
+
+  Under the hood, it runs papertrail command
+  
+      papertrail -S "API Requests" --min-time '120 minutes ago'
   """
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
@@ -60,9 +68,9 @@ defmodule ExGecko.Adapter.Papertrail do
   A sample format of the json object is like this.  Note the "message" section
 
   %{
-    "display_received_at" => "Aug 02 19:14:29", 
+    "display_received_at" => "Aug 02 19:14:29",
     "facility" => "Local3",
-    "generated_at" => "2016-08-02T19:14:29Z", 
+    "generated_at" => "2016-08-02T19:14:29Z",
     "hostname" => "brighterlink-api",
     "id" => "697210962448814080",
     "message" => "at=info method=GET path=\"/api/companies?_=1470165266333\" host=api.brighterlink.io request_id=6c1499a0-7e13-47ce-9efb-aa0a8dc9d7ea fwd=\"199.91.127.142\" dyno=web.1 connect=0ms service=94ms status=200 bytes=3165 ",

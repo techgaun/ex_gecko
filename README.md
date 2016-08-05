@@ -13,10 +13,10 @@ Be sure you set the environment variable before you use it
 or you can run the mix task included here to dump various datapoints into your existing dataset
 
 __Create a new dataset 'mynewdataset' using the datasets/reqs.json format__   
-`mix load_data -d mynewdataset -r reqs`
+`mix gecko.load -d mynewdataset -r reqs`
 
 __Load papertrail data into geckoboard dataset 'mynewdataset'__   
-`mix load_data -t papertrail -d mynewdataset`
+`mix gecko.load -t papertrail -d mynewdataset`
 
 __Note : Currently, the Geckboard dataset only supports up to 400 events, and this SDK will account for this by limiting the data it will send__
 
@@ -63,12 +63,12 @@ The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/p
 echo "token: 123456789012345678901234567890ab" > ~/.papertrail.yml
 ```
 
-Now you can use the mix load_data task to load papertrail logs:
+Now you can use the `mix gecko.load` task to load papertrail logs:
 
 ```shell
-mix load_data -d api.reqs -r papertrail.reqs # create dataset for papertrail request logs
+mix gecko.load -d api.reqs -r papertrail.reqs # create dataset for papertrail request logs
 
-mix load_data -d api-reqs -t papertrail # load data to datasets
+mix gecko.load -d api-reqs -t papertrail # load data to datasets
 ```
 
 #### Heroku
@@ -76,14 +76,14 @@ mix load_data -d api-reqs -t papertrail # load data to datasets
 The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapter as below:
 
 ```shell
-mix load_data -d heroku-api.load -r heroku.load # create dataset for load
-mix load_data -d heroku-api.memory -r heroku.memory # create dataset for memory
-mix load_data -d heroku-api-db.stats -r heroku.db # create dataset for db stats
+mix gecko.load -d heroku-api.load -r heroku.load # create dataset for load
+mix gecko.load -d heroku-api.memory -r heroku.memory # create dataset for memory
+mix gecko.load -d heroku-api-db.stats -r heroku.db # create dataset for db stats
 
 # run the actual loading of data as below:
-mix load_data -d heroku-api.load -t heroku -a type=load,lines=1000
-mix load_data -d heroku-api.memory -t heroku -a type=memory,app=your-heroku-app
-mix load_data -d heroku-api-db.stats -t heroku -a "type=db"
+mix gecko.load -d heroku-api.load -t heroku -a type=load,lines=1000
+mix gecko.load -d heroku-api.memory -t heroku -a type=memory,app=your-heroku-app
+mix gecko.load -d heroku-api-db.stats -t heroku -a "type=db"
 ```
 
 The heroku adapter supports following comma separated lists of arguments:

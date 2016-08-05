@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.LoadData do
+defmodule Mix.Tasks.Gecko.Load do
   use Mix.Task
   require Logger
   @shortdoc "Populates Geckoboard datasets"
@@ -11,13 +11,13 @@ defmodule Mix.Tasks.LoadData do
       export GECKO_API_KEY=<key>
 
       # load data from papertrail into your dataset
-      mix load_data -t papertrail -d mydataset
+      mix gecko.load -t papertrail -d mydataset
 
       # setup dataset (will erease all the previous data) using the right schema
-      mix load_data -d mydataset -r reqs
+      mix gecko.load -d mydataset -r reqs
 
       # load data from papertrail (pt) into your dataset with specific arguments.  Default values for "search" and "time" will be applied
-      mix load_data -t pt -d mydataset -a "time=24 hours ago,search=My Search"
+      mix gecko.load -t pt -d mydataset -a "time=24 hours ago,search=My Search"
 
   ## Command Line Options
     * `--dataset` / `-d` - the dataset you want to load
@@ -62,7 +62,6 @@ defmodule Mix.Tasks.LoadData do
     log("creating dataset '#{dataset}' using schema '#{schema}'")
     {:ok, %{}} = ExGecko.Api.create_dataset(dataset, schema)
   end
-  def reset_dataset(type, _dataset), do: log("Unknown dataset schema '#{type}'")
 
   def put_data(_dataset, events) when length(events) == 0, do: log("No events to load")
   def put_data(dataset, events) do

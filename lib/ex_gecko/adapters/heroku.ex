@@ -1,7 +1,17 @@
 defmodule ExGecko.Adapter.Heroku do
   @moduledoc """
-  Interacts with heroku cli to get latest logs, so that we can send to geckobard
-  heroku log --app <app_name>
+  Interacts with heroku cli to get latest logs, so that we can send the data to geckobard.
+
+  The heroku adapter accepts following arguments:
+
+  * `type` : One of `db`, `db-server`, `pg-backup`, `memory` and `load`
+  * `app` : The heroku app you are wishing to pump logs from
+  * `lines` : Number of lines to pull from logs (not applicable for `pg-backup`)
+
+  Under the hood, it runs heroku command:
+
+      heroku log --app <app_name> --num 1000
+      heroku pg:backups --app <app_name>
   """
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
