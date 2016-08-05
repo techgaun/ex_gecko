@@ -2,6 +2,24 @@
 
 Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer-beta.geckoboard.com/).  The SDK is initially based off of the node.js implementation described [here](https://developer-beta.geckoboard.com/nodejs/) and source [here](https://github.com/geckoboard/geckoboard-node)
 
+## Installation
+
+You can install ExGecko from hex by specifying `ex_gecko` in your mix.exs dependency:
+
+```elixir
+def deps do
+  [{:egaugex, "~> 0.0.1"}]
+end
+```
+
+You can install ExGecko from github as well:
+
+```elixir
+def deps do
+  [{:egaugex, github: "Brightergy/ex_gecko"}]
+end
+```
+
 ## Usage
 
 You can use the functions in `ExGecko.Api` for making requests to RESTful api of Geckoboard. There are shorthand functions that wrap the common get requests on the Geckboard resources.
