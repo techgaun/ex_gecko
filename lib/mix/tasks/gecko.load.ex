@@ -21,7 +21,8 @@ defmodule Mix.Tasks.Gecko.Load do
 
   ## Command Line Options
     * `--dataset` / `-d` - the dataset you want to load
-    * `--type` / `-t` - type of data you want to retrieve and load, currently only 'papertrail' is supported
+    * `--widget` / `-w` - the widget you want to update (will ignore dataset)
+    * `--type` / `-t` - type of data you want to retrieve and load, currently 'papertrail', 'herkou' and 'runscope' are supported
     * `--reset` / `-r` - this will recreate the dataset using the specific schema
     * `--args` / `-a` - arguments to be passed to the adapter (comma-separated)
   """
@@ -29,19 +30,19 @@ defmodule Mix.Tasks.Gecko.Load do
   @doc false
   def run(args) do
     {opts, _, _} = OptionParser.parse(args,
-      switches: [dataset: :string, type: :string, reset: :string, args: :string],
-      aliases: [d: :dataset, t: :type, r: :reset, a: :args]
+      switches: [dataset: :string, type: :string, reset: :string, widget: :string, args: :string],
+      aliases: [d: :dataset, t: :type, r: :reset, a: :args, w: :widget]
       )
     Application.ensure_all_started(:httpoison)
     case opts[:reset] do
-      nil -> _run(opts[:dataset], opts[:type], opts[:args])
+      nil -> _run(opts[:widget] || opts[:dataset], opts[:type], opts[:args])
       _ -> reset_dataset(opts[:reset], opts[:dataset])
     end
   end
 
   def log(msg), do: IO.puts msg
 
-  def _run(dataset, _type, _args) when is_nil(dataset), do: log("No 'dataset' was provided, please use the --dataset/-d switch statement'")
+  def _run(dataset, _type, _args) when is_nil(dataset), do: log("No 'dataset' or 'widget' was provided, please use the --dataset/-d or --widget/-w switch statement'")
   def _run(_dataset, type, _args) when is_nil(type), do: log("No 'type' was provided, please use the --type/-t switch statement'")
   def _run(dataset, "papertrail", args) do
     events = ExGecko.Adapter.Papertrail.load_events(args)
@@ -51,7 +52,15 @@ defmodule Mix.Tasks.Gecko.Load do
     events = ExGecko.Adapter.Heroku.load_events(args)
     put_data(dataset, events)
   end
+  def _run(widget, "runscope", args) do
+    {:ok, {status, down_time, response_time}} = ExGecko.Adapter.Runscope.uptime(args)
+    case ExGecko.Api.push_monitor(widget, status, down_time, response_time) do
+      {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
+      _ -> IO.puts "could not update widget"
+    end
+  end
   def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
+  def _run(dataset, "rs", args), do: _run(dataset, "runscope", args)
   def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")
 
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")

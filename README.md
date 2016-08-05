@@ -73,6 +73,8 @@ A key feature is the ability of the sdk to parse data from known sources of info
 
 * Heroku - integrates with the heroku cli to pump out CPU load, memory stats and postgres DB stats
 
+* Runscope - integrates with Runscope API to pull test results
+
 #### Papertrail
 
 The papertrail adapter requires [papertrail-cli](https://github.com/papertrail/papertrail-cli) to be installed. Once installed, make sure you configure papertrail so that it can fetch data.
@@ -111,3 +113,17 @@ The heroku adapter supports following comma separated lists of arguments:
 * `lines` : Number of lines to pull from logs (not applicable for `pg-backup`)
 
 The available dataset names that can be passed as `-r` argument: `heroku.db`, `heroku.db-server`, `heroku.load`, `heroku.memory`, `heroku.pg-backup`.
+
+#### Runscope
+
+The runscope adapter requires you to have an access_token from their OAuth2
+
+```shell
+export RUNSCOPE_TOKEN=<1234567890>
+```
+
+No you can use the `mix gecko.load` task to load events from runscope test result APIs into Geckoboard's "Up/Down" monitoring board :
+
+```shell
+mix gecko.load -w <widget key> -t runscope # updates a monitor widget with your runscope last passed test data
+```
