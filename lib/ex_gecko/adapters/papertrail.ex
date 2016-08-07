@@ -8,7 +8,7 @@ defmodule ExGecko.Adapter.Papertrail do
   * `time` : Earliest time to search from eg. `2 hours ago`
 
   Under the hood, it runs papertrail command
-  
+
       papertrail -S "API Requests" --min-time '120 minutes ago'
   """
 
@@ -21,18 +21,7 @@ defmodule ExGecko.Adapter.Papertrail do
     load_events(new_opts)
   end
 
-  def build_args(%{"search" => search, "time" => time} = opts) do
-    args = ["-j", "-S", search, "--min-time", "'#{time}'"]
-    config = opts["config"]
-    if config do
-      IO.puts "using config file #{config}"
-      args ++ ["-c", config]
-    else
-      args
-    end
-  end
-
-  def load_events(%{"search" => search, "time" => time} = opts) do
+  def load_events(%{"search" => _search, "time" => _time} = opts) do
     Application.ensure_all_started(:porcelain)
     IO.puts "Pulling papertrail logs"
     case Porcelain.exec("papertrail", build_args(opts)) do
@@ -50,6 +39,17 @@ defmodule ExGecko.Adapter.Papertrail do
   def load_events(opts) do
     # set default search/time values
     load_events(Map.merge(%{"time" => "72 hours ago", "search" => "API Requests"}, opts))
+  end
+
+  def build_args(%{"search" => search, "time" => time} = opts) do
+    args = ["-j", "-S", search, "--min-time", "'#{time}'"]
+    config = opts["config"]
+    if config do
+      IO.puts "using config file #{config}"
+      args ++ ["-c", config]
+    else
+      args
+    end
   end
 
   def decode_line(line) when is_nil(line) or line == "", do: nil

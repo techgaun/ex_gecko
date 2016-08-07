@@ -23,7 +23,7 @@ defmodule ExGecko.Adapter.Heroku do
     load_events(new_opts)
   end
 
-  def load_events(%{"app" => app, "lines" => lines, "type" => type} = opts) do
+  def load_events(%{"app" => app, "lines" => lines, "type" => type} = _opts) do
     Application.ensure_all_started(:porcelain)
     case Porcelain.exec("heroku", porcelain_args(type, app, lines)) do
       %{status: 0, out: output} ->
