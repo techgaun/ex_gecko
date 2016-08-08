@@ -57,6 +57,12 @@ ExGecko.Api.delete("mydataset")
 # Create a dataset (using the schema located in datasets/<type>.json)
 ExGecko.Api.create_dataset("mynewdataset", "reqs")
 
+# Push an monitor update
+ExGecko.Api.push_monitor("mywidget", "Up", "2 days ago", "112 ms") # down time and response time is optional
+
+# Push an arbitrary widget update
+ExGecko.Api.push("mywidget", %{"data" => <geckodata>})
+
 ```
 
 ### Datasets
@@ -125,5 +131,6 @@ export RUNSCOPE_TOKEN=<1234567890>
 No you can use the `mix gecko.load` task to load events from runscope test result APIs into Geckoboard's "Up/Down" monitoring board :
 
 ```shell
-mix gecko.load -w <widget key> -t runscope # updates a monitor widget with your runscope last passed test data
+# updates a monitor widget with your runscope last passed test data
+mix gecko.load -w <widget key> -t runscope
 ```
