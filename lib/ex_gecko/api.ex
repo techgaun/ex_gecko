@@ -76,8 +76,8 @@ defmodule ExGecko.Api do
   @spec find_or_create(String.t, map) :: ExGecko.response
   def find_or_create(id, fields), do: update(id, fields, false)
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data) when is_list(data) and length(data) > 400 do
-    IO.puts "Currently the Geckoboard API can not support more than 400 events, reducing events sent from #{length(data)} to 400"
+  def put(id, data) when is_list(data) and length(data) > 500 do
+    IO.puts "Currently the Geckoboard API can not support more than 500 events, reducing events sent from #{length(data)} to 500"
     put(id, data |> limit_data)
   end
 
@@ -167,7 +167,7 @@ defmodule ExGecko.Api do
   def limit_data(events) do
     events
     |> Enum.reverse
-    |> Enum.slice(0..399)
+    |> Enum.slice(0..499)
     |> Enum.reverse
   end
 
