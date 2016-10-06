@@ -100,7 +100,7 @@ defmodule ExGecko.Adapter.Papertrail do
     timestamp = data["received_at"]
     message = data["message"] |> String.strip
     msg_data = message |> String.split(" ")
-    path = msg_data |> Enum.at(2) |> String.split("path=") |> Enum.at(-1) |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0)
+    path = msg_data |> Enum.at(2) |> String.split("path=") |> Enum.at(-1) |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99)
     speed = msg_data |> Enum.at(-3) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
     status = msg_data |> Enum.at(-2) |> String.split("status=") |> Enum.at(-1)
     size = msg_data |> Enum.at(-1) |> String.split("bytes=") |> Enum.at(-1) |> String.to_integer
