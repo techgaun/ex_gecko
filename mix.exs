@@ -3,7 +3,7 @@ defmodule ExGecko.Mixfile do
 
   def project do
     [app: :ex_gecko,
-     version: "0.0.2-dev",
+     version: "0.0.2",
      elixir: "~> 1.2",
      elixirc_paths: ["lib"],
      description: "Elixir SDK to communicate with Geckoboard's API",
