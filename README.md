@@ -8,7 +8,7 @@ You can install ExGecko from hex by specifying `ex_gecko` in your mix.exs depend
 
 ```elixir
 def deps do
-  [{:egaugex, "~> 0.0.1"}]
+  [{:ex_gecko, "~> 0.0.2"}]
 end
 ```
 
@@ -16,7 +16,7 @@ You can install ExGecko from github as well:
 
 ```elixir
 def deps do
-  [{:egaugex, github: "Brightergy/ex_gecko"}]
+  [{:ex_gecko, github: "Brightergy/ex_gecko"}]
 end
 ```
 
