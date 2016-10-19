@@ -5,6 +5,7 @@ defmodule ExGecko.Adapter.Runscope do
   test results, the api is described here https://www.runscope.com/docs/api/results
   """
   require HTTPoison
+  require IEx
   alias ExGecko.Parser
 
   def url, do: "https://api.runscope.com"
@@ -18,14 +19,6 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end
 
-  def find_response_time(result) do
-      # this is very specific to our test case, have to refactor for more general use
-      response_time = Enum.at(Enum.at(result["requests"], 1)["assertions"], 1)["actual_value"]
-      if is_nil(response_time) do
-        response_time = Float.round((result["finished_at"] - result["started_at"]) * 1000, 2)
-      end
-      response_time
-  end
 
   def find_last_down(last, opts) do
     result = if last["result"] != "pass" do
@@ -60,16 +53,16 @@ defmodule ExGecko.Adapter.Runscope do
     |> Parser.parse
   end
 
-  def build_url(path, %{"bucket" => bucket, "test" => test} = opts) do
+  def build_url(path, %{"bucket_key" => bucket_key, "test_id" => test_id} = opts) do
      params = case opts["count"] do
        nil -> ""
        count -> "?count=#{count}"
      end
-     "#{url}/buckets/#{bucket}/tests/#{test}/results#{path}#{params}"
+     "#{url}/buckets/#{bucket_key}/tests/#{test_id}/results#{path}#{params}"
   end
 
   def build_url(path, opts) when is_nil(opts), do: build_url(path, %{})
-  def build_url(path, opts), do: build_url(path, Map.merge(opts, %{"bucket" => "to5q0u5gglr4", "test" => "d8bb2a75-828f-4f5d-92fb-d313f38f691b"}))
+  def build_url(path, opts), do: build_url(path, Map.merge(opts, %{"bucket_key" => "to5q0u5gglr4", "test_id" => "d8bb2a75-828f-4f5d-92fb-d313f38f691b"}))
 
   def auth_header do
     token = System.get_env("RUNSCOPE_TOKEN")
@@ -77,6 +70,43 @@ defmodule ExGecko.Adapter.Runscope do
       raise "Runscope token is missing"
     else
       [{"Authorization", "Bearer #{token}"}]
+    end
+  end
+
+
+  # Function Returns the average response time across all requests of the test
+
+  def find_response_time(test_run) do
+    test_run
+      |> Map.get("requests")
+      |> Enum.filter(fn(request) -> not is_nil(request["url"]) end)     # some returned steps are not actually in the test routine and have nil urls
+      |> Enum.map((fn(request) -> request["uuid"] end))
+      |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)
+  end
+
+  def avg_step_response([head | tail], %{:sum => sum, :num_steps => num_steps} , test_run) do
+    case step_response_time(head, test_run) do
+      {:ok, %{:response_time => response_time}} -> avg_step_response(tail, %{:sum => (sum + response_time), :num_steps => (num_steps + 1)}, test_run)
+      # If Http request to retrieve the response time fails, do not add to the average
+      _ -> avg_step_response(tail, %{:sum => sum, :num_steps => num_steps}, test_run)
+    end
+  end
+
+  # When no more step uuids to check, average the response time
+  def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
+    (sum / num_steps) * 1000
+  end
+
+  # Returns the total round trip time for a particular test step
+  def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
+    "/#{test_run_id}/steps/#{uuid}"
+    |> build_url(opts)
+    |> HTTPoison.get(auth_header)
+    |> Parser.parse
+    |> case do
+        {:ok, %{"data" => step_response}} ->
+          {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
+        _ -> {:error, ""}
     end
   end
 end

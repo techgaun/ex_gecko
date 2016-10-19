@@ -1,7 +1,7 @@
 defmodule ExGecko.PushTest do
   use ExUnit.Case
   doctest ExGecko
-  @monitor_key "199086-26213573-4594-40ac-902d-bc76cdf93a5a"
+  @monitor_key "129376-2cea8100-7834-0134-2c47-22000bdb45ae"
 
   test "should push up monitor up properly" do
     resp = ExGecko.Api.push_monitor(@monitor_key, :up)
