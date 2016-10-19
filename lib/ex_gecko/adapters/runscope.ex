@@ -74,31 +74,30 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
 
-  ####### Function Returns the average response time across all requests of the test
+  # Function Returns the average response time across all requests of the test
 
   def find_response_time(test_run) do
-      #test_run_id = result["test_run_id"]
-    Map.get(test_run, "requests")
-      |> Enum.filter(fn(request) -> not is_nil(request["url"]) end)     #some returned steps are not actually in the test routine and have nil urls
+    test_run
+      |> Map.get("requests")
+      |> Enum.filter(fn(request) -> not is_nil(request["url"]) end)     # some returned steps are not actually in the test routine and have nil urls
       |> Enum.map((fn(request) -> request["uuid"] end))
-      |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)                 
+      |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)
   end
 
   def avg_step_response([head | tail], %{:sum => sum, :num_steps => num_steps} , test_run) do
     case step_response_time(head, test_run) do
       {:ok, %{:response_time => response_time}} -> avg_step_response(tail, %{:sum => (sum + response_time), :num_steps => (num_steps + 1)}, test_run)
-      
-      #If Http request to retrieve the response time fails, do not add to the average
+      # If Http request to retrieve the response time fails, do not add to the average
       _ -> avg_step_response(tail, %{:sum => sum, :num_steps => num_steps}, test_run)
     end
   end
 
-  #When no more step uuids to check, average the response time
+  # When no more step uuids to check, average the response time
   def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
     (sum / num_steps) * 1000
   end
 
-  #Returns the total round trip time for a particular test step
+  # Returns the total round trip time for a particular test step
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
     "/#{test_run_id}/steps/#{uuid}"
     |> build_url(opts)
@@ -106,7 +105,7 @@ defmodule ExGecko.Adapter.Runscope do
     |> Parser.parse
     |> case do
         {:ok, %{"data" => step_response}} ->
-          {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} } 
+          {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
         _ -> {:error, ""}
     end
   end
