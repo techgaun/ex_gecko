@@ -76,13 +76,26 @@ defmodule ExGecko.Api do
   @spec find_or_create(String.t, map) :: ExGecko.response
   def find_or_create(id, fields), do: update(id, fields, false)
   @spec put(String.t, list) :: ExGecko.response
-  def put(id, data) when is_list(data) and length(data) > 500 do
-    IO.puts "Currently the Geckoboard API can not support more than 500 events, reducing events sent from #{length(data)} to 500"
+
+
+  def put(id, data) when is_list(data) and length(data) > 5000 do
+    IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
     put(id, data |> limit_data)
   end
 
+
+  def put(id, data) when is_list(data) and 500 < length(data) <= 5000 do
+    data 
+    |> Enum.chunk(500, 500, [])
+    |> Enum.each(fn x -> put(id, x) end)
+
+
+    # put(id, Enum.slice(data, 0..499))
+    # put(id, Enum.slice(data, 500..(length(data)-1)))
+  end
+
   def put(id, data) when is_list(data), do: put(id, %{"data" => data})
-  def put(id, data) when is_map(data) do
+  def put(id, data) when is_map(data)
     resp = update(id, data, true)
     case resp do
       {:ok, %{}} ->
@@ -167,9 +180,15 @@ defmodule ExGecko.Api do
   def limit_data(events) do
     events
     |> Enum.reverse
-    |> Enum.slice(0..499)
+    |> Enum.slice(0..4999)
     |> Enum.reverse
   end
+
+
+  @doc """
+  Batches
+
+  """
 
   @doc """
   Add header with username

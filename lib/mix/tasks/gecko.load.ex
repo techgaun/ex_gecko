@@ -1,6 +1,7 @@
 defmodule Mix.Tasks.Gecko.Load do
   use Mix.Task
   require Logger
+  require IEx
   @shortdoc "Populates Geckoboard datasets"
 
   @moduledoc """
@@ -53,6 +54,7 @@ defmodule Mix.Tasks.Gecko.Load do
     put_data(dataset, events)
   end
   def _run(widget, "runscope", args) do
+    IEx.pry()
     {:ok, {status, down_time, response_time}} = ExGecko.Adapter.Runscope.uptime(args)
     case ExGecko.Api.push_monitor(widget, status, down_time, response_time) do
       {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
@@ -66,7 +68,7 @@ defmodule Mix.Tasks.Gecko.Load do
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
   def reset_dataset(schema, dataset) do
     log("Deleting the dataset '#{dataset}'")
-    # delete will fail if it doesn't exist, but continue so we can create the new dataset
+    # delete will fail if it doesn't exist, continue so we can create the new dataset
     ExGecko.Api.delete(dataset)
     log("creating dataset '#{dataset}' using schema '#{schema}'")
     {:ok, %{}} = ExGecko.Api.create_dataset(dataset, schema)
