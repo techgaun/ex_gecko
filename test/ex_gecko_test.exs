@@ -2,6 +2,8 @@ defmodule ExGeckoTest do
   use ExUnit.Case
   doctest ExGecko
 
+  require IEx
+
   @fields  %{"fields" => %{"amount" => %{"type" => "number", "name" => "Amount"}, "timestamp" => %{"type" => "datetime", "name" => "Date"}}}
   @req_fields %{"path" => %{"name" => "Request Path", "type" => "string"},
      "speed" => %{"name" => "Request Speed", "type" => "number"},
@@ -15,6 +17,9 @@ defmodule ExGeckoTest do
           "status" => "200",
           "size" => 15010
          }
+
+  @batch_fields %{"fields" => %{"globalid" => %{"type" => "string", "name"=>"Global Id"}, "testfield" => %{ "type" => "number", "name" => "Test Field"}}}
+  @batch_path "test/support/batch_request.json"
 
   setup do
     name = "testset_" <> (:os.timestamp |> elem(2) |> Integer.to_string)
@@ -52,5 +57,18 @@ defmodule ExGeckoTest do
     {:ok, resp} = ExGecko.Api.create_reqs_dataset(name)
     {:ok, 1} = ExGecko.Api.put(name, [@data])
   end
+
+  test "should batch job of 2000 items", %{dataset: name} do
+    batch_data =  get_batch_data(@batch_path)
+    {:ok, resp} = ExGecko.Api.find_or_create(name, @batch_fields)
+    :ok = ExGecko.Api.append(name, batch_data["data"])
+  end
+
+  def get_batch_data(path) do 
+    path
+    |> File.read!
+    |> Poison.Parser.parse!  
+  end
+
 
 end

@@ -9,8 +9,6 @@ defmodule ExGecko.Api do
   alias ExGecko.Parser
   alias __MODULE__
 
-  require IEx
-
   @user_agent [{"User-agent", "ex_gecko"}]
   @content_type [{"Content-Type", "application/json"}]
 
@@ -59,21 +57,21 @@ defmodule ExGecko.Api do
   end
 
 
-  @spec post(String.t, map, boolean) :: ExGecko.response
   @doc """
   Wrapper for POST requests
 
   Examples
   """
-  def post(id, post_data, has_data \\ false) do
+  @spec post_request(String.t, map, boolean) :: ExGecko.response
+ 
+  def post_request(id, data, has_data \\ false) do
     req_header = request_header_content_type
-    if post_data |> is_map do
-      post_data = Poison.encode!(post_data)
+    if data |> is_map do
+      data = Poison.encode!(data)
     end
-    IEx.pry
     id
     |> build_url(has_data)
-    |> Api.post(post_data, req_header)
+    |> Api.post(data, req_header)
     |> Parser.parse
   end
 
@@ -101,6 +99,7 @@ defmodule ExGecko.Api do
   @spec put(String.t, list) :: ExGecko.response
 
 
+  #Need to handle batch job, redirect to append
   def put(id, data) when is_list(data) and length(data) > 500 do
     append(id, data)
   end
@@ -109,7 +108,6 @@ defmodule ExGecko.Api do
     put(id, %{"data" => data})
   end
   def put(id, data) when is_map(data) do
-    IEx.pry
     resp = update(id, data, true)
     case resp do
       {:ok, %{}} ->
@@ -123,6 +121,8 @@ defmodule ExGecko.Api do
   @doc """
   Appends data to an existing dataset. If the dataset contains a unique id field,
   then any fields with the same uniqueId will be updated.
+
+  Example 
   """
 
   def append(id, data) when is_list(data) and length(data) > 5000 do
@@ -141,8 +141,7 @@ defmodule ExGecko.Api do
   end
 
   def append(id, data) when is_map(data) do
-    IEx.pry
-    resp = post(id, data, true)
+    resp = post_request(id, data, true)
     case resp do
       {:ok, %{}} ->
         IO.puts "received data"
