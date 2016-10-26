@@ -56,14 +56,12 @@ defmodule ExGecko.Api do
     |> Parser.parse
   end
 
-
   @doc """
   Wrapper for POST requests
 
   Examples
   """
   @spec post_request(String.t, map, boolean) :: ExGecko.response
- 
   def post_request(id, data, has_data \\ false) do
     req_header = request_header_content_type
     if data |> is_map do
@@ -74,8 +72,6 @@ defmodule ExGecko.Api do
     |> Api.post(data, req_header)
     |> Parser.parse
   end
-
-
 
   @doc """
   Convenience function to manage datasets.  Follows similar syntax as this
@@ -99,7 +95,7 @@ defmodule ExGecko.Api do
   @spec put(String.t, list) :: ExGecko.response
 
 
-  #Need to handle batch job, redirect to append
+  # Need to handle batch job, redirect to append
   def put(id, data) when is_list(data) and length(data) > 500 do
     append(id, data)
   end
@@ -117,43 +113,39 @@ defmodule ExGecko.Api do
     end
   end
 
-  @spec append(String.t, map) :: ExGecko.response
+  
   @doc """
   Appends data to an existing dataset. If the dataset contains a unique id field,
   then any fields with the same uniqueId will be updated.
 
   Example 
   """
+  @spec append(String.t, map) :: ExGecko.response
 
   def append(id, data) when is_list(data) and length(data) > 5000 do
     IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
     append(id, data |> limit_data)
   end
 
-  def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do   
-    data 
-    |> Enum.chunk(500, 500, [])
-    |> Enum.each(fn x -> append(id, x) end)    
+  def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do
+    data
+    |> Enum.chunk(500, 500, [])                   #break into the maximum request size, send individually
+    |> Enum.each(fn x -> append(id, x) end)       #Enum.each function always returns :ok, could find way to check if one request fails
   end
 
   def append(id, data) when is_list(data) do
     append(id, %{"data" => data})
   end
 
-  def append(id, data) when is_map(data) do
+  def append(id, data) when is_map(data) do    
     resp = post_request(id, data, true)
     case resp do
       {:ok, %{}} ->
-        IO.puts "received data"
         count = length(data["data"])
         {:ok, count}
       _ -> resp
     end
   end
-
-
-
-
 
   @spec push(String.t, map) :: ExGecko.response
   @doc """
