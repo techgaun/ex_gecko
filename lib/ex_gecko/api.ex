@@ -113,7 +113,6 @@ defmodule ExGecko.Api do
     end
   end
 
-  
   @doc """
   Appends data to an existing dataset. If the dataset contains a unique id field,
   then any fields with the same uniqueId will be updated.
@@ -129,15 +128,15 @@ defmodule ExGecko.Api do
 
   def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do
     data
-    |> Enum.chunk(500, 500, [])                   #break into the maximum request size, send individually
-    |> Enum.each(fn x -> append(id, x) end)       #Enum.each function always returns :ok, could find way to check if one request fails
+    |> Enum.chunk(500, 500, [])                   # break into the maximum request size, send individually
+    |> Enum.each(fn x -> append(id, x) end)       # Enum.each function always returns :ok, could find way to check if one request fails
   end
 
   def append(id, data) when is_list(data) do
     append(id, %{"data" => data})
   end
 
-  def append(id, data) when is_map(data) do    
+  def append(id, data) when is_map(data) do
     resp = post_request(id, data, true)
     case resp do
       {:ok, %{}} ->
