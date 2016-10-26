@@ -1,7 +1,6 @@
 defmodule Mix.Tasks.Gecko.Load do
   use Mix.Task
   require Logger
-  require IEx
   @shortdoc "Populates Geckoboard datasets"
 
   @moduledoc """
@@ -54,7 +53,6 @@ defmodule Mix.Tasks.Gecko.Load do
     put_data(dataset, events)
   end
   def _run(widget, "runscope", args) do
-    IEx.pry()
     {:ok, {status, down_time, response_time}} = ExGecko.Adapter.Runscope.uptime(args)
     case ExGecko.Api.push_monitor(widget, status, down_time, response_time) do
       {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
