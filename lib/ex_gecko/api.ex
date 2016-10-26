@@ -9,6 +9,8 @@ defmodule ExGecko.Api do
   alias ExGecko.Parser
   alias __MODULE__
 
+  require IEx
+
   @user_agent [{"User-agent", "ex_gecko"}]
   @content_type [{"Content-Type", "application/json"}]
 
@@ -56,6 +58,27 @@ defmodule ExGecko.Api do
     |> Parser.parse
   end
 
+
+  @spec post(String.t, map, boolean) :: ExGecko.response
+  @doc """
+  Wrapper for POST requests
+
+  Examples
+  """
+  def post(id, post_data, has_data \\ false) do
+    req_header = request_header_content_type
+    if post_data |> is_map do
+      post_data = Poison.encode!(post_data)
+    end
+    IEx.pry
+    id
+    |> build_url(has_data)
+    |> Api.post(post_data, req_header)
+    |> Parser.parse
+  end
+
+
+
   @doc """
   Convenience function to manage datasets.  Follows similar syntax as this
   https://developer-beta.geckoboard.com/nodejs/
@@ -78,24 +101,15 @@ defmodule ExGecko.Api do
   @spec put(String.t, list) :: ExGecko.response
 
 
-  def put(id, data) when is_list(data) and length(data) > 5000 do
-    IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
-    put(id, data |> limit_data)
+  def put(id, data) when is_list(data) and length(data) > 500 do
+    append(id, data)
   end
 
-
-  def put(id, data) when is_list(data) and 500 < length(data) <= 5000 do
-    data 
-    |> Enum.chunk(500, 500, [])
-    |> Enum.each(fn x -> put(id, x) end)
-
-
-    # put(id, Enum.slice(data, 0..499))
-    # put(id, Enum.slice(data, 500..(length(data)-1)))
+  def put(id, data) when is_list(data) do
+    put(id, %{"data" => data})
   end
-
-  def put(id, data) when is_list(data), do: put(id, %{"data" => data})
-  def put(id, data) when is_map(data)
+  def put(id, data) when is_map(data) do
+    IEx.pry
     resp = update(id, data, true)
     case resp do
       {:ok, %{}} ->
@@ -104,6 +118,43 @@ defmodule ExGecko.Api do
       _ -> resp
     end
   end
+
+  @spec append(String.t, map) :: ExGecko.response
+  @doc """
+  Appends data to an existing dataset. If the dataset contains a unique id field,
+  then any fields with the same uniqueId will be updated.
+  """
+
+  def append(id, data) when is_list(data) and length(data) > 5000 do
+    IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
+    append(id, data |> limit_data)
+  end
+
+  def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do   
+    data 
+    |> Enum.chunk(500, 500, [])
+    |> Enum.each(fn x -> append(id, x) end)    
+  end
+
+  def append(id, data) when is_list(data) do
+    append(id, %{"data" => data})
+  end
+
+  def append(id, data) when is_map(data) do
+    IEx.pry
+    resp = post(id, data, true)
+    case resp do
+      {:ok, %{}} ->
+        IO.puts "received data"
+        count = length(data["data"])
+        {:ok, count}
+      _ -> resp
+    end
+  end
+
+
+
+
 
   @spec push(String.t, map) :: ExGecko.response
   @doc """
@@ -184,11 +235,6 @@ defmodule ExGecko.Api do
     |> Enum.reverse
   end
 
-
-  @doc """
-  Batches
-
-  """
 
   @doc """
   Add header with username
