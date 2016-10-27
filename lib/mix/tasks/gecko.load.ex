@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Gecko.Load do
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
   def reset_dataset(schema, dataset) do
     log("Deleting the dataset '#{dataset}'")
-    # delete will fail if it doesn't exist, but continue so we can create the new dataset
+    # delete will fail if it doesn't exist, continue so we can create the new dataset
     ExGecko.Api.delete(dataset)
     log("creating dataset '#{dataset}' using schema '#{schema}'")
     {:ok, %{}} = ExGecko.Api.create_dataset(dataset, schema)

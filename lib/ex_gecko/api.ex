@@ -57,6 +57,23 @@ defmodule ExGecko.Api do
   end
 
   @doc """
+  Wrapper for POST requests
+
+  Examples
+  """
+  @spec post_request(String.t, map, boolean) :: ExGecko.response
+  def post_request(id, data, has_data \\ false) do
+    req_header = request_header_content_type
+    if data |> is_map do
+      data = Poison.encode!(data)
+    end
+    id
+    |> build_url(has_data)
+    |> Api.post(data, req_header)
+    |> Parser.parse
+  end
+
+  @doc """
   Convenience function to manage datasets.  Follows similar syntax as this
   https://developer-beta.geckoboard.com/nodejs/
 
@@ -76,14 +93,51 @@ defmodule ExGecko.Api do
   @spec find_or_create(String.t, map) :: ExGecko.response
   def find_or_create(id, fields), do: update(id, fields, false)
   @spec put(String.t, list) :: ExGecko.response
+
+
+  # Need to handle batch job, redirect to append
   def put(id, data) when is_list(data) and length(data) > 500 do
-    IO.puts "Currently the Geckoboard API can not support more than 500 events, reducing events sent from #{length(data)} to 500"
-    put(id, data |> limit_data)
+    append(id, data)
   end
 
-  def put(id, data) when is_list(data), do: put(id, %{"data" => data})
+  def put(id, data) when is_list(data) do
+    put(id, %{"data" => data})
+  end
   def put(id, data) when is_map(data) do
     resp = update(id, data, true)
+    case resp do
+      {:ok, %{}} ->
+        count = length(data["data"])
+        {:ok, count}
+      _ -> resp
+    end
+  end
+
+  @doc """
+  Appends data to an existing dataset. If the dataset contains a unique id field,
+  then any fields with the same uniqueId will be updated.
+
+  Example 
+  """
+  @spec append(String.t, map) :: ExGecko.response
+
+  def append(id, data) when is_list(data) and length(data) > 5000 do
+    IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
+    append(id, data |> limit_data)
+  end
+
+  def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do
+    data
+    |> Enum.chunk(500, 500, [])                   # break into the maximum request size, send individually
+    |> Enum.each(fn x -> append(id, x) end)       # Enum.each function always returns :ok, could find way to check if one request fails
+  end
+
+  def append(id, data) when is_list(data) do
+    append(id, %{"data" => data})
+  end
+
+  def append(id, data) when is_map(data) do
+    resp = post_request(id, data, true)
     case resp do
       {:ok, %{}} ->
         count = length(data["data"])
@@ -167,9 +221,10 @@ defmodule ExGecko.Api do
   def limit_data(events) do
     events
     |> Enum.reverse
-    |> Enum.slice(0..499)
+    |> Enum.slice(0..4999)
     |> Enum.reverse
   end
+
 
   @doc """
   Add header with username
