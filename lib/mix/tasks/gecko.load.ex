@@ -34,10 +34,28 @@ defmodule Mix.Tasks.Gecko.Load do
       aliases: [d: :dataset, t: :type, r: :reset, a: :args, w: :widget]
       )
     Application.ensure_all_started(:httpoison)
-    case opts[:reset] do
-      nil -> _run(opts[:widget] || opts[:dataset], opts[:type], opts[:args])
-      _ -> reset_dataset(opts[:reset], opts[:dataset])
+    
+
+    # Identify whether we are updating a dataset or directly updating a widget
+    # Providing a widget key to update a widget is a legacy system for Geckoboard
+    # Otherwise, provide a dataset name
+
+    case opts[:widget] do
+      nil ->                            #if no widget flag, we're using datasets
+        case opts[:reset] do
+          nil -> _run(opts[:dataset], opts[:type], opts[:args])
+          _ -> reset_dataset(opts[:reset], opts[:dataset])
+        end
+      _ -> _run(opts[:widget], opts[:type], opts[:args], :widget)
+      end
     end
+
+    # REMOVE
+    #
+    #case opts[:reset] do
+    #  nil -> _run(opts[:widget] || opts[:dataset], opts[:type], opts[:args])
+    #  _ -> reset_dataset(opts[:reset], opts[:dataset])
+    #end
   end
 
   def log(msg), do: IO.puts msg
@@ -52,13 +70,25 @@ defmodule Mix.Tasks.Gecko.Load do
     events = ExGecko.Adapter.Heroku.load_events(args)
     put_data(dataset, events)
   end
-  def _run(widget, "runscope", args) do
+
+  def _run(dataset, "runscope", args) do
+    case ExGecko.Adapter.Runscope.load_events(args) do
+      {:ok, events} -> put_data(dataset, events)
+      _ -> log("Unable to update dataset")
+    end
+  end
+
+  def _run(widget, "runscope", args, :widget) do
     {:ok, {status, down_time, response_time}} = ExGecko.Adapter.Runscope.uptime(args)
     case ExGecko.Api.push_monitor(widget, status, down_time, response_time) do
       {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
       _ -> IO.puts "could not update widget"
     end
   end
+
+
+  
+
   def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
   def _run(dataset, "rs", args), do: _run(dataset, "runscope", args)
   def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")

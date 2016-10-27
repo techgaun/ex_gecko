@@ -131,9 +131,27 @@ The runscope adapter requires you to have an access_token from their OAuth2
 export RUNSCOPE_TOKEN=<1234567890>
 ```
 
-No you can use the `mix gecko.load` task to load events from runscope test result APIs into Geckoboard's "Up/Down" monitoring board :
+For runscope, the following datasets may be initialized: 
+```shell
+mix gecko.load -d <dataset_name> -r runscope.dash # Mimics the dashboard of the Runscope web interface
+```
+
+Then, to load data to the above datasets, you must use the following arguments:
+
+* `test` : The ID of the test that you would like to add/update in the Geckoboard dataset
+* `bucket_id` : The ID of the testing bucket
+
+For example, you may add/update the dataset as below:
+
+```shell
+mix gecko.load -d <dataset_name> -t runscope -a test=<test id> bucket_id=<bucket id>
+```
+
+
+You may also use Geckoboard's legacy Uptime widget to briefly summarize the status of your Runscope tests. To do so, simply specify the 
+widget key, as well as the test ID of the target test:
 
 ```shell
 # updates a monitor widget with your runscope last passed test data
-mix gecko.load -w <widget key> -t runscope
+mix gecko.load -w <widget key> -t runscope -a test=<test id> bucket_id=<bucket id>
 ```

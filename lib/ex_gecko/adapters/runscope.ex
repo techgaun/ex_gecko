@@ -3,12 +3,49 @@ defmodule ExGecko.Adapter.Runscope do
   Interacts with runscope API.  This doesn't handle authentication described here https://www.runscope.com/docs/api/authentication.
   This will assume you have an access_token available to use.  The main thing this will do is call the tests results API to get the latest
   test results, the api is described here https://www.runscope.com/docs/api/results
+
+  The heroku adapter accepts following arguments:
+
+  * `name` : The name of the test that will be updated
+  * `test` : The id of the test that will be updated in the Geckoboard dataset
+  * `bucket_id` : the ID of the test bucket
+
+  Note, we need both the name and the test ID because the Runscope API does not return the name of the test in its response. Therefore we have to 
+  rely on the user to input the name
+
   """
   require HTTPoison
   require IEx
   alias ExGecko.Parser
 
   def url, do: "https://api.runscope.com"
+
+
+  # NEWLY ADDED
+
+  def load_events(opts) when is_nil(opts), do: load_events(%{})
+  def load_events(opts) when is_bitstring(opts) do
+    new_opts = opts
+    |> String.split(",")
+    |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
+    |> Map.new
+    load_events(new_opts)
+  end
+
+  def load_events(%{"test" => test_id, "bucket_id" => bucket_id, "name" => name} = opts) do
+    event
+    case last_result(opts) do
+      {:ok, %{"data" => last}} ->
+        event = {"test_id" => test_id, "name" => name, "last_status" = last["result"]}
+      _ -> {:error, ""}
+    end
+  end
+
+  def calc_success_ratio
+
+  # END OF ADDITIONS
+
+
 
   def uptime(opts) do
     case last_result(opts) do
