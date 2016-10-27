@@ -51,6 +51,9 @@ ExGecko.Api.find_or_create("mydataset", %{"fields" => %{"path" => %{"type" => "s
 # Replace data in dataset   
 ExGecko.Api.put("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
 
+# Append data to a dataset
+ExGecko.Api.append("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
+
 # Delete dataset   
 ExGecko.Api.delete("mydataset")
 
