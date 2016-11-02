@@ -1,6 +1,7 @@
 defmodule Mix.Tasks.Gecko.Load do
   use Mix.Task
   require Logger
+  require IEx
   @shortdoc "Populates Geckoboard datasets"
 
   @moduledoc """
@@ -29,17 +30,18 @@ defmodule Mix.Tasks.Gecko.Load do
 
   @doc false
   def run(args) do
+    IEx.pry
     {opts, _, _} = OptionParser.parse(args,
       switches: [dataset: :string, type: :string, reset: :string, widget: :string, args: :string],
       aliases: [d: :dataset, t: :type, r: :reset, a: :args, w: :widget]
       )
     Application.ensure_all_started(:httpoison)
+    Application.ensure_all_started(:tzdata)
     
 
     # Identify whether we are updating a dataset or directly updating a widget
     # Providing a widget key to update a widget is a legacy system for Geckoboard
     # Otherwise, provide a dataset name
-
     case opts[:widget] do
       nil ->                            #if no widget flag, we're using datasets
         case opts[:reset] do
@@ -47,8 +49,8 @@ defmodule Mix.Tasks.Gecko.Load do
           _ -> reset_dataset(opts[:reset], opts[:dataset])
         end
       _ -> _run(opts[:widget], opts[:type], opts[:args], :widget)
-      end
     end
+  end
 
     # REMOVE
     #
@@ -56,7 +58,6 @@ defmodule Mix.Tasks.Gecko.Load do
     #  nil -> _run(opts[:widget] || opts[:dataset], opts[:type], opts[:args])
     #  _ -> reset_dataset(opts[:reset], opts[:dataset])
     #end
-  end
 
   def log(msg), do: IO.puts msg
 
@@ -72,8 +73,11 @@ defmodule Mix.Tasks.Gecko.Load do
   end
 
   def _run(dataset, "runscope", args) do
+    IEx.pry
     case ExGecko.Adapter.Runscope.load_events(args) do
-      {:ok, events} -> put_data(dataset, events)
+      {:ok, event} -> 
+        IEx.pry
+        update_data(dataset, [event])
       _ -> log("Unable to update dataset")
     end
   end
@@ -86,9 +90,6 @@ defmodule Mix.Tasks.Gecko.Load do
     end
   end
 
-
-  
-
   def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
   def _run(dataset, "rs", args), do: _run(dataset, "runscope", args)
   def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")
@@ -100,6 +101,18 @@ defmodule Mix.Tasks.Gecko.Load do
     ExGecko.Api.delete(dataset)
     log("creating dataset '#{dataset}' using schema '#{schema}'")
     {:ok, %{}} = ExGecko.Api.create_dataset(dataset, schema)
+  end
+
+  def update_data(_dataset, events) when length(events) == 0, do: log("No event to load")
+
+  def update_data(dataset, events) do
+    log("loading #{length(events)} events to #{dataset}")
+    case ExGecko.Api.append(dataset, events) do
+      {:ok, count} ->
+        log("successfully loaded #{count} events")
+      {:error, error, code} ->
+        log("HTTP Error #{code} (#{error}) loading data points")
+    end
   end
 
   def put_data(_dataset, events) when length(events) == 0, do: log("No events to load")

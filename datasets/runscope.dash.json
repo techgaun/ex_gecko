@@ -1,0 +1,30 @@
+{
+	"fields": {
+		"test_id": {
+			"type": "string",
+			"name": "ID of Test"
+		},
+		"name" : {
+			"type": "string",
+			"name": "Test Name"
+		},
+		"last_status": {
+			"type": "string",
+			"name": "Last Status"
+		},
+		"last_test_date": { 
+			"type": "datetime",
+			"name": "Last Tested"
+		},
+		"success_ratio": {
+			"type": "percentage",
+			"name": "Success of Test Over Past 24 hours"
+		},
+		"avg_response_time": {
+			"type": "number",
+			"name": "Average Response Time"
+		}
+	},
+
+	"unique_by": ["test_id", "last_test_date"]
+}

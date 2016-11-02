@@ -32,16 +32,79 @@ defmodule ExGecko.Adapter.Runscope do
     load_events(new_opts)
   end
 
+  #
+  # Builds a single event for the given test_id, to be pushed to the geckoboard dataset
+  #
   def load_events(%{"test" => test_id, "bucket_id" => bucket_id, "name" => name} = opts) do
-    event
     case last_result(opts) do
       {:ok, %{"data" => last}} ->
-        event = {"test_id" => test_id, "name" => name, "last_status" = last["result"]}
+        last_status = last["result"]
+        IEx.pry
+        last_test_date = get_datetime(last["finished_at"])
+        success_ratio = calc_success_ratio(opts)
+        avg_response_time = find_response_time(last)
+        event = %{
+                  "test_id" => test_id,
+                  "name" => name,
+                  "last_status" => last_status,
+                  "last_test_date" => last_test_date,
+                  "success_ratio" => success_ratio,
+                  "avg_response_time" => avg_response_time}
+        {:ok, event}
+
       _ -> {:error, ""}
     end
   end
 
-  def calc_success_ratio
+  @doc """
+  Converts a Unix time float to an ISO 8601 string
+  """
+  def unix_time_to_iso(unix_time) do
+    unix_time
+    |> Float.floor
+    |> Kernel.+(62167219200)
+    |> Kernel.trunc
+    |> :calendar.gregorian_seconds_to_datetime 
+    |> Timex.datetime
+    |> Timex.format("{ISOz}")
+  end
+
+  def get_datetime(unix_time) do
+    case unix_time_to_iso(unix_time) do
+      {:ok, iso} -> iso
+      _ -> ""
+    end
+  end
+
+  def calc_success_ratio(opts) do 
+    IEx.pry
+    timestamp = Timex.Convertable.to_unix(Timex.DateTime.now) - 24*60*60    #Timestamp for 24 hours ago
+    new_opts = Map.merge(%{"since" => timestamp, "count" => 50}, opts)
+    case test_results(new_opts) do
+      {:ok, %{"data" => results}} -> Enum.reduce(results, 0, fn(result, accum) -> if result["result"] == "pass", do: accum + 1, else: accum end)/Enum.count(results)
+      _ -> nil
+    end
+  end 
+
+
+#  def unix_time_to_datetime(unix_time) do
+#   unix_time
+#    |> Float.floor
+#    |> Kernel.+(62167219200)
+#    |> :calendar.gregorian_seconds_to_datetime 
+#    |> 
+#  end
+
+#  def erlang_datetime_to_iso_string(datetime) do
+#    Integer.to_string(elem(elem(datetime, 1)), 1)
+#    <> "-"
+#    <> Integer.to_string(elem(elem(datetime, 1)), 2)
+#  end
+
+  @doc """
+  
+  """
+  
 
   # END OF ADDITIONS
 
@@ -91,15 +154,25 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   def build_url(path, %{"bucket_key" => bucket_key, "test_id" => test_id} = opts) do
-     params = case opts["count"] do
-       nil -> ""
-       count -> "?count=#{count}"
-     end
+     params = ""
+     |> add_param(opts, "count")
+     #|> add_param(opts, "since")
+     #params = case opts["count"] do
+     #  nil -> ""
+     #  count -> "?count=#{count}"
+     #end
      "#{url}/buckets/#{bucket_key}/tests/#{test_id}/results#{path}#{params}"
   end
 
   def build_url(path, opts) when is_nil(opts), do: build_url(path, %{})
   def build_url(path, opts), do: build_url(path, Map.merge(opts, %{"bucket_key" => "to5q0u5gglr4", "test_id" => "d8bb2a75-828f-4f5d-92fb-d313f38f691b"}))
+
+  def add_param(param_string, opts, param) do
+    case opts[param] do
+       nil -> param_string
+       val -> if param_string == "", do: "?#{param}=#{val}", else: param_string <> "&{param}=#{val}"
+    end
+  end
 
   def auth_header do
     token = System.get_env("RUNSCOPE_TOKEN")
