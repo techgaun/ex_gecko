@@ -5,7 +5,6 @@ defmodule ExGecko.Adapter.Runscope do
   test results, the api is described here https://www.runscope.com/docs/api/results
   """
   require HTTPoison
-  require IEx
   alias ExGecko.Parser
 
   def url, do: "https://api.runscope.com"
@@ -93,7 +92,7 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   # When no more step uuids to check, average the response time
-  def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
+  def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, _) do
     (sum / num_steps) * 1000
   end
 
