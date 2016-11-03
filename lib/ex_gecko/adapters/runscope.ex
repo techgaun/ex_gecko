@@ -217,4 +217,5 @@ defmodule ExGecko.Adapter.Runscope do
       [{"Authorization", "Bearer #{token}"}]
     end
   end
+  def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
 end

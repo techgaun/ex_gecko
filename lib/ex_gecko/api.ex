@@ -32,9 +32,7 @@ defmodule ExGecko.Api do
   @spec update(String.t, map, boolean) :: ExGecko.response
   def update(id, put_data, data \\ false) do
     req_header = request_header_content_type
-    if put_data |> is_map do
-      put_data = Poison.encode!(put_data)
-    end
+    put_data = if put_data |> is_map, do: Poison.encode!(put_data), else: put_data
     id
     |> build_url(data)
     |> Api.put(put_data, req_header)
@@ -64,9 +62,7 @@ defmodule ExGecko.Api do
   @spec post_request(String.t, map, boolean) :: ExGecko.response
   def post_request(id, data, has_data \\ false) do
     req_header = request_header_content_type
-    if data |> is_map do
-      data = Poison.encode!(data)
-    end
+    data = if data |> is_map, do: Poison.encode!(data), else: data
     id
     |> build_url(has_data)
     |> Api.post(data, req_header)
@@ -117,7 +113,7 @@ defmodule ExGecko.Api do
   Appends data to an existing dataset. If the dataset contains a unique id field,
   then any fields with the same uniqueId will be updated.
 
-  Example 
+  Example
   """
   @spec append(String.t, map) :: ExGecko.response
 
