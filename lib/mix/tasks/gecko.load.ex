@@ -36,13 +36,12 @@ defmodule Mix.Tasks.Gecko.Load do
       )
     Application.ensure_all_started(:httpoison)
     Application.ensure_all_started(:tzdata)
-    
 
     # Identify whether we are updating a dataset or directly updating a widget
     # Providing a widget key to update a widget is a legacy system for Geckoboard
     # Otherwise, provide a dataset name
     case opts[:widget] do
-      nil ->                            #if no widget flag, we're using datasets
+      nil ->                            # if no widget flag, we're using datasets
         case opts[:reset] do
           nil -> _run(opts[:dataset], opts[:type], opts[:args])
           _ -> reset_dataset(opts[:reset], opts[:dataset])
@@ -66,8 +65,7 @@ defmodule Mix.Tasks.Gecko.Load do
 
   def _run(dataset, "runscope", args) do
     case ExGecko.Adapter.Runscope.load_events(args) do
-      {:ok, event} -> 
-        update_data(dataset, [event])
+      {:ok, event} -> update_data(dataset, [event])
       _ -> log("Unable to update dataset")
     end
   end

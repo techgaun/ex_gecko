@@ -14,7 +14,6 @@ defmodule ExGecko.Adapter.Runscope do
 
   """
   require HTTPoison
-  require IEx
   alias ExGecko.Parser
 
   def url, do: "https://api.runscope.com"
@@ -57,8 +56,7 @@ defmodule ExGecko.Adapter.Runscope do
 
   def get_test_name(opts) do
     case test_detail(opts) do
-      {:ok, %{"data" => detail}} -> IEx.pry
-                                    detail["name"]
+      {:ok, %{"data" => detail}} -> detail["name"]
       _ -> nil
     end
   end
@@ -117,19 +115,19 @@ defmodule ExGecko.Adapter.Runscope do
     |> Float.floor
     |> Kernel.+(62167219200)  # convert unix time to gregorian (since year 0)
     |> Kernel.trunc
-    |> :calendar.gregorian_seconds_to_datetime 
+    |> :calendar.gregorian_seconds_to_datetime
     |> Timex.datetime
     |> Timex.format("{ISOz}")
   end
 
-  def calc_success_ratio(opts) do 
-    timestamp = Timex.Convertable.to_unix(Timex.DateTime.now) - 7 * 24 * 60 * 60    # Timestamp for 24 hours ago
+  def calc_success_ratio(opts) do
+    timestamp = Timex.Convertable.to_unix(Timex.DateTime.now) - 7 * 24 * 60 * 60  # Timestamp for 24 hours ago
     new_opts = if is_nil(opts), do: %{"since" => timestamp, "count" => 50}, else: Map.merge(%{"since" => timestamp, "count" => 50}, opts)
     case test_results(new_opts) do
       {:ok, %{"data" => results}} -> Enum.reduce(results, 0, fn(result, accum) -> if result["result"] == "pass", do: accum + 1, else: accum end) / Enum.count(results)
       _ -> {:error, ""}
     end
-  end 
+  end
 
   def uptime(opts) do
     case last_result(opts) do
