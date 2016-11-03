@@ -1,7 +1,6 @@
 defmodule Mix.Tasks.Gecko.Load do
   use Mix.Task
   require Logger
-  require IEx
   @shortdoc "Populates Geckoboard datasets"
 
   @moduledoc """
@@ -30,7 +29,7 @@ defmodule Mix.Tasks.Gecko.Load do
 
   @doc false
   def run(args) do
-    IEx.pry
+
     {opts, _, _} = OptionParser.parse(args,
       switches: [dataset: :string, type: :string, reset: :string, widget: :string, args: :string],
       aliases: [d: :dataset, t: :type, r: :reset, a: :args, w: :widget]
@@ -52,13 +51,6 @@ defmodule Mix.Tasks.Gecko.Load do
     end
   end
 
-    # REMOVE
-    #
-    #case opts[:reset] do
-    #  nil -> _run(opts[:widget] || opts[:dataset], opts[:type], opts[:args])
-    #  _ -> reset_dataset(opts[:reset], opts[:dataset])
-    #end
-
   def log(msg), do: IO.puts msg
 
   def _run(dataset, _type, _args) when is_nil(dataset), do: log("No 'dataset' or 'widget' was provided, please use the --dataset/-d or --widget/-w switch statement'")
@@ -73,10 +65,8 @@ defmodule Mix.Tasks.Gecko.Load do
   end
 
   def _run(dataset, "runscope", args) do
-    IEx.pry
     case ExGecko.Adapter.Runscope.load_events(args) do
       {:ok, event} -> 
-        IEx.pry
         update_data(dataset, [event])
       _ -> log("Unable to update dataset")
     end

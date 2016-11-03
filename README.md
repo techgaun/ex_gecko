@@ -138,7 +138,7 @@ mix gecko.load -d <dataset_name> -r runscope.dash # Mimics the dashboard of the 
 
 Then, to load data to the above datasets, you must use the following arguments:
 
-* `test` : The ID of the test that you would like to add/update in the Geckoboard dataset
+* `test_id` : The ID of the test that you would like to add/update in the Geckoboard dataset
 * `bucket_id` : The ID of the testing bucket
 
 For example, you may add/update the dataset as below:
