@@ -6,7 +6,6 @@ defmodule ExGecko.Adapter.Runscope do
 
   The heroku adapter accepts following arguments:
 
-  * `name` : The name of the test that will be updated
   * `test` : The id of the test that will be updated in the Geckoboard dataset
   * `bucket_id` : the ID of the test bucket
 
@@ -34,41 +33,57 @@ defmodule ExGecko.Adapter.Runscope do
 
   #
   # Builds a single event for the given test_id, to be pushed to the geckoboard dataset
+  # TO DO - support different schemas - right now, this only supports runscope.dash.json
   #
-  def load_events(%{"test" => test_id, "bucket_id" => bucket_id, "name" => name} = opts) do
+  def load_events(%{"test" => test_id, "bucket_id" => bucket_id} = opts) do
     case last_result(opts) do
       {:ok, %{"data" => last}} ->
         last_status = last["result"]
-        IEx.pry
         last_test_date = get_datetime(last["finished_at"])
         success_ratio = calc_success_ratio(opts)
         avg_response_time = find_response_time(last)
+        name = get_test_name(opts)
+        assertion_success_ratio = last["assertions_passed"]/last["assertions_defined"]
+        IEx.pry
         event = %{
                   "test_id" => test_id,
-                  "name" => name,
-                  "last_status" => last_status,
-                  "last_test_date" => last_test_date,
-                  "success_ratio" => success_ratio,
-                  "avg_response_time" => avg_response_time}
+                  "name" => get_test_name(opts),
+                  "last_status" => last["result"],
+                  "last_test_date" => get_datetime(last["finished_at"]),
+                  "success_ratio" => calc_success_ratio(opts),
+                  "avg_response_time" => find_response_time(last),
+                  "assertion_success_ratio" => assertion_success_ratio
+                }
         {:ok, event}
 
       _ -> {:error, ""}
     end
   end
 
-  @doc """
-  Converts a Unix time float to an ISO 8601 string
-  """
+
+  def get_test_name(opts) do
+    case test_detail(opts) do
+      {:ok, %{"data" => detail}} -> detail["name"]
+      _ -> nil
+    end
+  end
+
+  #
+  # Converts a Unix time float to an ISO 8601 string
+  #
   def unix_time_to_iso(unix_time) do
     unix_time
     |> Float.floor
-    |> Kernel.+(62167219200)
+    |> Kernel.+(62167219200)  # convert unix time to gregorian (since year 0)
     |> Kernel.trunc
     |> :calendar.gregorian_seconds_to_datetime 
     |> Timex.datetime
     |> Timex.format("{ISOz}")
   end
 
+  #
+  # Wrapper for converting unix time to ISO 8601 string
+  #
   def get_datetime(unix_time) do
     case unix_time_to_iso(unix_time) do
       {:ok, iso} -> iso
@@ -77,7 +92,6 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   def calc_success_ratio(opts) do 
-    IEx.pry
     timestamp = Timex.Convertable.to_unix(Timex.DateTime.now) - 24*60*60    #Timestamp for 24 hours ago
     new_opts = Map.merge(%{"since" => timestamp, "count" => 50}, opts)
     case test_results(new_opts) do
@@ -86,24 +100,6 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end 
 
-
-#  def unix_time_to_datetime(unix_time) do
-#   unix_time
-#    |> Float.floor
-#    |> Kernel.+(62167219200)
-#    |> :calendar.gregorian_seconds_to_datetime 
-#    |> 
-#  end
-
-#  def erlang_datetime_to_iso_string(datetime) do
-#    Integer.to_string(elem(elem(datetime, 1)), 1)
-#    <> "-"
-#    <> Integer.to_string(elem(elem(datetime, 1)), 2)
-#  end
-
-  @doc """
-  
-  """
   
 
   # END OF ADDITIONS
@@ -139,34 +135,48 @@ defmodule ExGecko.Adapter.Runscope do
     "#{ago} secs ago"
   end
 
-  def last_result(opts) do
-    "/latest"
-    |> build_url(opts)
-    |> HTTPoison.get(auth_header)
-    |> Parser.parse
-  end
 
-  def test_results(opts) do
+  #
+  # Retrieves test details such as name, version, creator, etc
+  # Example URL : https://api.runscope.com/buckets/#{BUCKETID}/tests/#{TESTID}
+  #
+  def test_detail(opts) do
     ""
     |> build_url(opts)
     |> HTTPoison.get(auth_header)
     |> Parser.parse
   end
 
+  def last_result(opts) do
+    "/results/latest"
+    |> build_url(opts)
+    |> HTTPoison.get(auth_header)
+    |> Parser.parse
+  end
+
+  def test_results(opts) do
+    "/results"
+    |> build_url(opts)
+    |> HTTPoison.get(auth_header)
+    |> Parser.parse
+  end
+
   def build_url(path, %{"bucket_key" => bucket_key, "test_id" => test_id} = opts) do
+    
      params = ""
      |> add_param(opts, "count")
-     #|> add_param(opts, "since")
-     #params = case opts["count"] do
-     #  nil -> ""
-     #  count -> "?count=#{count}"
-     #end
-     "#{url}/buckets/#{bucket_key}/tests/#{test_id}/results#{path}#{params}"
+     |> add_param(opts, "since")
+
+     "#{url}/buckets/#{bucket_key}/tests/#{test_id}#{path}#{params}"
   end
 
   def build_url(path, opts) when is_nil(opts), do: build_url(path, %{})
   def build_url(path, opts), do: build_url(path, Map.merge(opts, %{"bucket_key" => "to5q0u5gglr4", "test_id" => "d8bb2a75-828f-4f5d-92fb-d313f38f691b"}))
 
+
+  #
+  # If the given param is a key in the options map, appends the value to the param_string
+  #
   def add_param(param_string, opts, param) do
     case opts[param] do
        nil -> param_string
@@ -204,12 +214,13 @@ defmodule ExGecko.Adapter.Runscope do
 
   # When no more step uuids to check, average the response time
   def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
+    IEx.pry
     (sum / num_steps) * 1000
   end
 
   # Returns the total round trip time for a particular test step
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
-    "/#{test_run_id}/steps/#{uuid}"
+    "/results/#{test_run_id}/steps/#{uuid}"
     |> build_url(opts)
     |> HTTPoison.get(auth_header)
     |> Parser.parse

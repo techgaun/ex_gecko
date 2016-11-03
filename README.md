@@ -144,7 +144,7 @@ Then, to load data to the above datasets, you must use the following arguments:
 For example, you may add/update the dataset as below:
 
 ```shell
-mix gecko.load -d <dataset_name> -t runscope -a test=<test id> bucket_id=<bucket id>
+mix gecko.load -d <dataset_name> -t runscope -a test=<test id>bucket_id=<bucket id>
 ```
 
 

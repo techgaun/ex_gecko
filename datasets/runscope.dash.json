@@ -23,6 +23,10 @@
 		"avg_response_time": {
 			"type": "number",
 			"name": "Average Response Time"
+		},
+		"assertion_success_ratio": {
+			"type": "percentage",
+			"name": "Percentage of Assertions Passed"
 		}
 	},
 
