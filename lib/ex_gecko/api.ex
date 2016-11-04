@@ -88,9 +88,8 @@ defmodule ExGecko.Api do
   end
   @spec find_or_create(String.t, map) :: ExGecko.response
   def find_or_create(id, fields), do: update(id, fields, false)
+
   @spec put(String.t, list) :: ExGecko.response
-
-
   # Need to handle batch job, redirect to append
   def put(id, data) when is_list(data) and length(data) > 500 do
     append(id, data)
@@ -116,16 +115,22 @@ defmodule ExGecko.Api do
   Example
   """
   @spec append(String.t, map) :: ExGecko.response
-
   def append(id, data) when is_list(data) and length(data) > 5000 do
     IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
-    append(id, data |> limit_data)
+    append(id, (data |> limit_data))
   end
 
   def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do
     data
     |> Enum.chunk(500, 500, [])                   # break into the maximum request size, send individually
-    |> Enum.each(fn x -> append(id, x) end)       # Enum.each function always returns :ok, could find way to check if one request fails
+    |> Enum.reduce({:ok, 0}, fn x, {_status, val} ->
+      case append(id, x) do
+        {:ok, count} ->
+          {:ok, val + count}
+        _ ->
+          {:error, 0}
+      end
+    end)
   end
 
   def append(id, data) when is_list(data) do

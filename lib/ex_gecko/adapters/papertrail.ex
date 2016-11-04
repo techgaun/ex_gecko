@@ -98,12 +98,18 @@ defmodule ExGecko.Adapter.Papertrail do
   """
   def process_data(data) do
     timestamp = data["received_at"]
-    message = data["message"] |> String.strip
-    msg_data = message |> String.split(" ")
-    path = msg_data |> Enum.at(2) |> String.split("path=") |> Enum.at(-1) |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99)
-    speed = msg_data |> Enum.at(-3) |> String.split("service=") |> Enum.at(-1) |> String.replace("ms", "") |> String.to_integer
-    status = msg_data |> Enum.at(-2) |> String.split("status=") |> Enum.at(-1)
-    size = msg_data |> Enum.at(-1) |> String.split("bytes=") |> Enum.at(-1) |> String.to_integer
-    %{"path" => path, "speed" => speed, "timestamp" => timestamp, "status" => status, "size" => size}
+    data["message"]
+    |> String.strip
+    |> String.split(" ")
+    |> Enum.reduce(%{"timestamp" => timestamp}, fn x, acc ->
+      Map.merge(acc, _process_metric(x))
+    end)
   end
+
+  def _process_metric("path=" <> path), do: %{"path" => (path |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99))}
+  def _process_metric("status=" <> status), do: %{"status" => status}
+  def _process_metric("bytes="), do: %{"size" => 0}
+  def _process_metric("bytes=" <> size), do: %{"size" => String.to_integer(size)}
+  def _process_metric("service=" <> speed), do: %{"speed" => (speed |> String.replace("ms", "") |> String.to_integer)}
+  def _process_metric(_), do: %{}
 end
