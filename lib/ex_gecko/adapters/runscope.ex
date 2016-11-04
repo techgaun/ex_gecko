@@ -29,7 +29,7 @@ defmodule ExGecko.Adapter.Runscope do
 
   # Builds a single event for the given test_id, to be pushed to the geckoboard dataset
   # TO DO - support different schemas - right now, this only supports runscope.dash.json
-  def load_events(%{"test_id" => test_id, "bucket_id" => bucket_id} = opts) do
+  def load_events(%{"test_id" => test_id, "bucket_id" => _bucket_id} = opts) do
     case last_result(opts) do
       {:ok, %{"data" => last}} ->
         last_status = last["result"]
@@ -79,9 +79,7 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   # When no more step uuids to check, average the response time
-  def avg_step_response([], %{sum: sum, num_steps: num_steps}, test_run) do
-    (sum / num_steps) * 1000
-  end
+  def avg_step_response([], %{sum: sum, num_steps: num_steps}, _test_run), do: (sum / num_steps) * 1000
 
   # Returns the total round trip time for a particular test step
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
