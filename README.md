@@ -22,6 +22,13 @@ def deps do
 end
 ```
 
+You can also clone this repository and then run the mix tasks from within the project directory in case you do not wish to make your own separate project.
+
+```shell
+git clone git@github.com:Brightergy/ex_gecko.git
+mix deps.get
+```
+
 ## Usage
 
 You can use the functions in `ExGecko.Api` for making requests to RESTful api of Geckoboard. There are shorthand functions that wrap the common get requests on the Geckboard resources.
