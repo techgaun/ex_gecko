@@ -80,7 +80,7 @@ defmodule Mix.Tasks.Gecko.Load do
       {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
       _ -> IO.puts "could not update widget"
     end
-  end  
+  end
 
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
   def reset_dataset(schema, dataset) do
