@@ -3,7 +3,7 @@ defmodule ExGecko.Mixfile do
 
   def project do
     [app: :ex_gecko,
-     version: "0.0.2",
+     version: "0.0.3",
      elixir: "~> 1.2",
      elixirc_paths: ["lib"],
      description: "Elixir SDK to communicate with Geckoboard's API",
@@ -36,7 +36,7 @@ defmodule ExGecko.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 0.8.0"},
+      {:httpoison, "~> 0.8.0 or ~> 0.9.0"},
       {:poison, "~> 1.5.2"},
       {:porcelain, "~> 2.0"},
       {:excoveralls, "~> 0.5.4", only: :test},

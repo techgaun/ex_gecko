@@ -1,4 +1,6 @@
-# ex_gecko [![Hex version](https://img.shields.io/hexpm/v/ex_gecko.svg "Hex version")](https://hex.pm/packages/ex_gecko) ![Hex downloads](https://img.shields.io/hexpm/dt/ex_gecko.svg "Hex downloads") [![Build Status](https://semaphoreci.com/api/v1/brucewang/ex_gecko/branches/master/badge.svg)](https://semaphoreci.com/brucewang/ex_gecko) [![Coverage Status](https://coveralls.io/repos/github/Brightergy/ex_gecko/badge.svg?branch=master)](https://coveralls.io/github/Brightergy/ex_gecko?branch=master)
+# ex_gecko
+
+[![Hex version](https://img.shields.io/hexpm/v/ex_gecko.svg "Hex version")](https://hex.pm/packages/ex_gecko) ![Hex downloads](https://img.shields.io/hexpm/dt/ex_gecko.svg "Hex downloads") [![Build Status](https://semaphoreci.com/api/v1/brucewang/ex_gecko/branches/master/badge.svg)](https://semaphoreci.com/brucewang/ex_gecko) [![Coverage Status](https://coveralls.io/repos/github/Brightergy/ex_gecko/badge.svg?branch=master)](https://coveralls.io/github/Brightergy/ex_gecko?branch=master)
 
 Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer-beta.geckoboard.com/).  The SDK is initially based off of the node.js implementation described [here](https://developer-beta.geckoboard.com/nodejs/) and source [here](https://github.com/geckoboard/geckoboard-node)
 
@@ -8,11 +10,11 @@ You can install ExGecko from hex by specifying `ex_gecko` in your mix.exs depend
 
 ```elixir
 def deps do
-  [{:ex_gecko, "~> 0.0.2"}]
+  [{:ex_gecko, "~> 0.0.3"}]
 end
 ```
 
-You can install ExGecko from github as well:
+You can install ExGecko from github as well but be aware that the master branch might not always be stable:
 
 ```elixir
 def deps do
@@ -131,7 +133,7 @@ The runscope adapter requires you to have an access_token from their OAuth2
 export RUNSCOPE_TOKEN=<1234567890>
 ```
 
-For runscope, the following datasets may be initialized: 
+For runscope, the following datasets may be initialized:
 ```shell
 mix gecko.load -d <dataset_name> -r runscope.dash # Mimics the dashboard of the Runscope web interface
 ```
@@ -148,7 +150,7 @@ mix gecko.load -d <dataset_name> -t runscope -a test=<test id>bucket_id=<bucket 
 ```
 
 
-You may also use Geckoboard's legacy Uptime widget to briefly summarize the status of your Runscope tests. To do so, simply specify the 
+You may also use Geckoboard's legacy Uptime widget to briefly summarize the status of your Runscope tests. To do so, simply specify the
 widget key, as well as the test ID of the target test:
 
 ```shell
