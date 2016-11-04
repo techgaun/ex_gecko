@@ -45,7 +45,7 @@ defmodule ExGeckoTest do
 
   test "should delete dataset properly", %{dataset: name} do
     {:ok, resp} = ExGecko.Api.find_or_create(name, @fields)
-    {:ok, %{}} = ExGecko.Api.delete(name)    
+    {:ok, %{}} = ExGecko.Api.delete(name)
   end
 
   test "should create reqs dataset properly", %{dataset: name} do
@@ -61,13 +61,13 @@ defmodule ExGeckoTest do
   test "should batch job of 2000 items", %{dataset: name} do
     batch_data =  get_batch_data(@batch_path)
     {:ok, resp} = ExGecko.Api.find_or_create(name, @batch_fields)
-    :ok = ExGecko.Api.append(name, batch_data["data"])
+    {:ok, 2000}= ExGecko.Api.append(name, batch_data["data"])
   end
 
-  def get_batch_data(path) do 
+  def get_batch_data(path) do
     path
     |> File.read!
-    |> Poison.Parser.parse!  
+    |> Poison.Parser.parse!
   end
 
 
