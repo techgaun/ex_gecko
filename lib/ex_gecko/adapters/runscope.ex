@@ -9,7 +9,7 @@ defmodule ExGecko.Adapter.Runscope do
   * `test_id` : The id of the test that will be updated in the Geckoboard dataset
   * `bucket_id` : the ID of the test bucket
 
-  Note, we need both the name and the test ID because the Runscope API does not return the name of the test in its response. Therefore we have to 
+  Note, we need both the name and the test ID because the Runscope API does not return the name of the test in its response. Therefore we have to
   rely on the user to input the name
 
   """
@@ -70,7 +70,7 @@ defmodule ExGecko.Adapter.Runscope do
       |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)
   end
 
-  def avg_step_response([head | tail], %{:sum => sum, :num_steps => num_steps} , test_run) do
+  def avg_step_response([head | tail], %{sum: sum, num_steps: num_steps} , test_run) do
     case step_response_time(head, test_run) do
       {:ok, %{:response_time => response_time}} -> avg_step_response(tail, %{:sum => (sum + response_time), :num_steps => (num_steps + 1)}, test_run)
       # If Http request to retrieve the response time fails, do not add to the average
@@ -79,7 +79,7 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   # When no more step uuids to check, average the response time
-  def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
+  def avg_step_response([], %{sum: sum, num_steps: num_steps}, test_run) do
     (sum / num_steps) * 1000
   end
 
@@ -217,5 +217,4 @@ defmodule ExGecko.Adapter.Runscope do
       [{"Authorization", "Bearer #{token}"}]
     end
   end
-  def avg_step_response([], %{:sum => sum, :num_steps => num_steps}, test_run) do
 end

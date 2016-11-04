@@ -70,17 +70,17 @@ defmodule Mix.Tasks.Gecko.Load do
     end
   end
 
+  def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
+  def _run(dataset, "rs", args), do: _run(dataset, "runscope", args)
+  def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")
+
   def _run(widget, "runscope", args, :widget) do
     {:ok, {status, down_time, response_time}} = ExGecko.Adapter.Runscope.uptime(args)
     case ExGecko.Api.push_monitor(widget, status, down_time, response_time) do
       {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
       _ -> IO.puts "could not update widget"
     end
-  end
-
-  def _run(dataset, "pt", args), do: _run(dataset, "papertrail", args)
-  def _run(dataset, "rs", args), do: _run(dataset, "runscope", args)
-  def _run(_dataset, type, _args), do: log("Do not know how to handle type '#{type}'")
+  end  
 
   def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
   def reset_dataset(schema, dataset) do
