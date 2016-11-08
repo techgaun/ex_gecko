@@ -38,7 +38,7 @@ defmodule ExGecko.Adapter.Papertrail do
 
   def load_events(opts) do
     # set default search/time values
-    load_events(Map.merge(%{"time" => "72 hours ago", "search" => "API Requests"}, opts))
+    load_events(Map.merge(%{"time" => "168 hours ago", "search" => "API Requests"}, opts))
   end
 
   def build_args(%{"search" => search, "time" => time} = opts) do
