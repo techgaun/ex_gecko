@@ -20,11 +20,9 @@ defmodule ExGecko.Adapter.Runscope do
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
   def load_events(opts) when is_bitstring(opts) do
-    new_opts = opts
-    |> String.split(",")
-    |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
-    |> Map.new
-    load_events(new_opts)
+    opts
+    |> parse_args
+    |> load_events
   end
 
   # Builds a single event for the given test_id, to be pushed to the geckoboard dataset
@@ -40,17 +38,25 @@ defmodule ExGecko.Adapter.Runscope do
         assertion_success_ratio = last["assertions_passed"] / last["assertions_defined"]
         event = %{
                   "test_id" => test_id,
-                  "name" => get_test_name(opts),
-                  "last_status" => last["result"],
-                  "last_test_date" => get_datetime(last["finished_at"]),
-                  "success_ratio" => calc_success_ratio(opts),
-                  "avg_response_time" => find_response_time(last),
+                  "name" => name,
+                  "last_status" => last_status,
+                  "last_test_date" => last_test_date,
+                  "success_ratio" => success_ratio,
+                  "avg_response_time" => avg_response_time,
                   "assertion_success_ratio" => assertion_success_ratio
                 }
         {:ok, event}
 
       _ -> {:error, ""}
     end
+  end
+
+  # parses bitstring into a map
+  def parse_args(opts) do 
+    new_opts = opts
+    |> String.split(",")
+    |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
+    |> Map.new
   end
 
 
@@ -68,6 +74,7 @@ defmodule ExGecko.Adapter.Runscope do
       |> Enum.filter(fn(request) -> not is_nil(request["url"]) end)     # some returned steps are not actually in the test routine and have nil urls
       |> Enum.map((fn(request) -> request["uuid"] end))
       |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)
+      |> Float.round(2) # use 2 digits of precision
   end
 
   def avg_step_response([head | tail], %{sum: sum, num_steps: num_steps} , test_run) do
@@ -127,7 +134,8 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end
 
-  def uptime(opts) do
+  def uptime(args) do
+    opts = parse_args(args)
     case last_result(opts) do
       {:ok, %{"data" => last}} ->
         status = if last["result"] == "pass", do: :up, else: :down
@@ -152,8 +160,13 @@ defmodule ExGecko.Adapter.Runscope do
   def convert_to_ago(result) when is_nil(result), do: ""
   def convert_to_ago(result) do
     time = result["finished_at"]
-    ago = Float.round((:os.system_time(:milli_seconds) / 1000) - time, 2)
-    "#{ago} secs ago"
+    ago = Float.round(:os.system_time(:second) - time, 2)
+    cond do
+       ago < 60 -> "#{Float.round(ago,2)} seconds ago"
+       ago < 60*60 -> "#{Float.round(ago/60,2)} minutes ago"
+       ago < 60*60*24 -> "#{Float.round(ago/3600,1)} hours ago"
+       true -> "#{Float.round(ago/86400,1)} days ago"
+    end
   end
 
 

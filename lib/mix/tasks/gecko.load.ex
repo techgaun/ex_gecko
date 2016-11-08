@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Gecko.Load do
   end
   def _run(dataset, "heroku", args) do
     events = ExGecko.Adapter.Heroku.load_events(args)
-    update_data(dataset, events)
+    put_data(dataset, events)
   end
 
   def _run(dataset, "runscope", args) do
