@@ -110,7 +110,7 @@ defmodule ExGecko.Api do
 
   @doc """
   Appends data to an existing dataset. If the dataset contains a unique id field,
-  then any fields with the same uniqueId will be updated.
+  then any existing records in the dataset with the same unique id will be updated.
 
   Example
   """
