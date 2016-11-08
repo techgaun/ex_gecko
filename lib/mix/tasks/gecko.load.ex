@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Gecko.Load do
   def _run(_dataset, type, _args) when is_nil(type), do: log("No 'type' was provided, please use the --type/-t switch statement'")
   def _run(dataset, "papertrail", args) do
     events = ExGecko.Adapter.Papertrail.load_events(args)
-    put_data(dataset, events)
+    update_data(dataset, events)
   end
   def _run(dataset, "heroku", args) do
     events = ExGecko.Adapter.Heroku.load_events(args)
