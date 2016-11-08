@@ -69,12 +69,18 @@ defmodule ExGecko.Adapter.Runscope do
 
   # Function Returns the average response time across all requests of the test
   def find_response_time(test_run) do
-    test_run
+    time = test_run
       |> Map.get("requests")
       |> Enum.filter(fn(request) -> not is_nil(request["url"]) end)     # some returned steps are not actually in the test routine and have nil urls
       |> Enum.map((fn(request) -> request["uuid"] end))
       |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)
-      |> Float.round(2) # use 2 digits of precision
+
+
+    if is_nil(time) do
+      nil
+    else
+      Float.round(time, 2) # use 2 digits of precision
+    end
   end
 
   def avg_step_response([head | tail], %{sum: sum, num_steps: num_steps} , test_run) do
@@ -86,7 +92,13 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   # When no more step uuids to check, average the response time
-  def avg_step_response([], %{sum: sum, num_steps: num_steps}, _test_run), do: (sum / num_steps) * 1000
+  def avg_step_response([], %{sum: sum, num_steps: num_steps}, _test_run) do
+    if num_steps == 0 do
+      nil
+    else 
+      (sum / num_steps) * 1000
+    end
+  end
 
   # Returns the total round trip time for a particular test step
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
@@ -96,7 +108,11 @@ defmodule ExGecko.Adapter.Runscope do
     |> Parser.parse
     |> case do
         {:ok, %{"data" => step_response}} ->
-          {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
+          if (!is_nil(step_response["response"]["timestamp"]) && !is_nil(step_response["response"]["timestamp"])) do
+            {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
+          else
+            {:error, ""} 
+          end
         _ -> {:error, ""}
     end
   end
