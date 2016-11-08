@@ -2,23 +2,28 @@
   "fields": {
     "path": {
       "type": "string",
-      "name": "Request Path"
+      "name": "Request Path",
+      "optional": false
     },
     "speed": {
       "type": "number",
-      "name": "Request Speed"
+      "name": "Request Speed",
+      "optional": false
     },
     "size": {
       "type": "number",
-      "name": "Request Size"
+      "name": "Request Size",
+      "optional": false
     },
     "status" : {
       "type" : "string",
-      "name" : "Status Code"
+      "name" : "Status Code",
+      "optional": false
     },
     "timestamp": {
       "type": "datetime",
-      "name": "Date"
+      "name": "Date",
+      "optional": false
     }
   }
 }

@@ -4,12 +4,12 @@ defmodule ExGeckoTest do
 
   require IEx
 
-  @fields  %{"fields" => %{"amount" => %{"type" => "number", "name" => "Amount"}, "timestamp" => %{"type" => "datetime", "name" => "Date"}}}
-  @req_fields %{"path" => %{"name" => "Request Path", "type" => "string"},
-     "speed" => %{"name" => "Request Speed", "type" => "number"},
-     "timestamp" => %{"name" => "Date", "type" => "datetime"},
-     "status" => %{"name" => "Status Code", "type" => "string"},
-     "size" => %{"name" => "Request Size", "type" => "number"}
+  @fields  %{"fields" => %{"amount" => %{"type" => "number", "name" => "Amount",  "optional" => false}, "timestamp" => %{"type" => "datetime", "name" => "Date",  "optional" => false}}}
+  @req_fields %{"path" => %{"name" => "Request Path", "type" => "string", "optional" => false},
+     "speed" => %{"name" => "Request Speed", "type" => "number",  "optional" => false},
+     "timestamp" => %{"name" => "Date", "type" => "datetime",  "optional" => false},
+     "status" => %{"name" => "Status Code", "type" => "string",  "optional" => false},
+     "size" => %{"name" => "Request Size", "type" => "number",  "optional" => false}
    }
    @data %{"path" => "/api/testpath",
           "speed" => 491,
