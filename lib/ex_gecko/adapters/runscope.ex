@@ -53,7 +53,7 @@ defmodule ExGecko.Adapter.Runscope do
 
   # parses bitstring into a map
   def parse_args(opts) do 
-    new_opts = opts
+    opts
     |> String.split(",")
     |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
     |> Map.new
@@ -67,7 +67,9 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end
 
+  #
   # Function Returns the average response time across all requests of the test
+  #
   def find_response_time(test_run) do
     time = test_run
       |> Map.get("requests")
@@ -77,12 +79,15 @@ defmodule ExGecko.Adapter.Runscope do
 
 
     if is_nil(time) do
-      nil
+      ""
     else
       Float.round(time, 2) # use 2 digits of precision
     end
   end
 
+  #
+  # Determines total run time of test, by recursively iterating through steps
+  #
   def avg_step_response([head | tail], %{sum: sum, num_steps: num_steps} , test_run) do
     case step_response_time(head, test_run) do
       {:ok, %{:response_time => response_time}} -> avg_step_response(tail, %{:sum => (sum + response_time), :num_steps => (num_steps + 1)}, test_run)
@@ -91,7 +96,9 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end
 
+  #
   # When no more step uuids to check, average the response time
+  #
   def avg_step_response([], %{sum: sum, num_steps: num_steps}, _test_run) do
     if num_steps == 0 do
       nil
@@ -100,7 +107,9 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end
 
+  #
   # Returns the total round trip time for a particular test step
+  # 
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
     "/results/#{test_run_id}/steps/#{uuid}"
     |> build_url(opts)
@@ -141,6 +150,9 @@ defmodule ExGecko.Adapter.Runscope do
     |> Timex.format("{ISOz}")
   end
 
+  #
+  # Calculates the percentage of tests that have succeeded over the past 24 hours
+  #
   def calc_success_ratio(opts) do
     timestamp = Timex.Convertable.to_unix(Timex.DateTime.now) - 7 * 24 * 60 * 60  # Timestamp for 24 hours ago
     new_opts = if is_nil(opts), do: %{"since" => timestamp, "count" => 50}, else: Map.merge(%{"since" => timestamp, "count" => 50}, opts)
@@ -150,6 +162,10 @@ defmodule ExGecko.Adapter.Runscope do
     end
   end
 
+
+  #
+  # Prepares a request matching the Geckoboard Legacy Uptime widget
+  #
   def uptime(args) do
     opts = parse_args(args)
     case last_result(opts) do
