@@ -52,7 +52,7 @@ defmodule ExGecko.Adapter.Runscope do
   end
 
   # parses bitstring into a map
-  def parse_args(opts) do 
+  def parse_args(opts) do
     opts
     |> String.split(",")
     |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
@@ -102,14 +102,14 @@ defmodule ExGecko.Adapter.Runscope do
   def avg_step_response([], %{sum: sum, num_steps: num_steps}, _test_run) do
     if num_steps == 0 do
       nil
-    else 
+    else
       (sum / num_steps) * 1000
     end
   end
 
   #
   # Returns the total round trip time for a particular test step
-  # 
+  #
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
     "/results/#{test_run_id}/steps/#{uuid}"
     |> build_url(opts)
@@ -120,7 +120,7 @@ defmodule ExGecko.Adapter.Runscope do
           if (!is_nil(step_response["response"]["timestamp"]) && !is_nil(step_response["response"]["timestamp"])) do
             {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
           else
-            {:error, ""} 
+            {:error, ""}
           end
         _ -> {:error, ""}
     end
@@ -192,7 +192,7 @@ defmodule ExGecko.Adapter.Runscope do
   def convert_to_ago(result) when is_nil(result), do: ""
   def convert_to_ago(result) do
     time = result["finished_at"]
-    ago = Float.round(:os.system_time(:second) - time, 2)
+    ago = Float.round(:os.system_time(:seconds) - time, 2)
     cond do
        ago < 60 -> "#{Float.round(ago,2)} seconds ago"
        ago < 60*60 -> "#{Float.round(ago/60,2)} minutes ago"
