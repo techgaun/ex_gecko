@@ -195,8 +195,8 @@ defmodule ExGecko.Adapter.Runscope do
     ago = Float.round(:os.system_time(:seconds) - time, 2)
     cond do
        ago < 60 -> "#{Float.round(ago,2)} seconds ago"
-       ago < 60*60 -> "#{Float.round(ago/60,2)} minutes ago"
-       ago < 60*60*24 -> "#{Float.round(ago/3600,1)} hours ago"
+       ago < (60 * 60) -> "#{Float.round(ago/60,2)} minutes ago"
+       ago < (60 * 60 * 24) -> "#{Float.round(ago/3600,1)} hours ago"
        true -> "#{Float.round(ago/86400,1)} days ago"
     end
   end
