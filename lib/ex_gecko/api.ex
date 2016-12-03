@@ -142,20 +142,20 @@ defmodule ExGecko.Api do
     end
   end
 
-  @spec push(String.t, map) :: ExGecko.response
   @doc """
   Push API to Geckoboard, which is a POST with this data format
 
-  {
-    "api_key": "222f66ab58130a8ece8ccd7be57f12e2",
-    "data": {
-       "item": [
-          { "text": "Visitors", "value": 4223 },
-          { "text": "", "value": 238 }
-        ]
-    }
-  }
+      {
+        "api_key": "222f66ab58130a8ece8ccd7be57f12e2",
+        "data": {
+           "item": [
+              { "text": "Visitors", "value": 4223 },
+              { "text": "", "value": 238 }
+            ]
+        }
+      }
   """
+  @spec push(String.t, map) :: ExGecko.response
   def push(widget_key, data) do
     api_key = System.get_env("GECKO_API_KEY")
     post_data = %{"api_key" => api_key, "data" => data} |> Poison.encode!
@@ -168,17 +168,17 @@ defmodule ExGecko.Api do
   @doc """
   Monitor format expected from geckoboard
 
-  {
-    "status": "Up",
-    "downTime": "9 days ago",
-    "responseTime": "593 ms"
-  }
+      {
+        "status": "Up",
+        "downTime": "9 days ago",
+        "responseTime": "593 ms"
+      }
 
-  {
-    "status": "Down",
-    "downTime": "2 days ago",
-    "responseTime": "593 ms"
-  }
+      {
+        "status": "Down",
+        "downTime": "2 days ago",
+        "responseTime": "593 ms"
+      }
   """
   def push_monitor(widget_key, status, down_time \\ "", response_time \\ "") do
     push(widget_key, %{"status" => format_status(status), "downTime" => down_time, "responseTime" => response_time})
@@ -208,7 +208,7 @@ defmodule ExGecko.Api do
   def build_url(id, :push), do: "https://push.geckoboard.com/v1/send/#{id}"
 
   @doc """
-    ## Examples
+  ## Examples
 
       iex> Mix.Tasks.LoadData.limit_data(Enum.to_list(1..500)) === Enum.to_list(101..500)
       true
