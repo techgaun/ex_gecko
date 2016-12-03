@@ -38,13 +38,12 @@ defmodule ExGeckoTest do
     {:ok, resp} = ExGecko.Api.find_or_create(name, @fields)
     assert resp["fields"] == @fields["fields"]
     # ensure the created_at is recent
-    created_at = resp["created_at"]
     {:ok, resp2} = ExGecko.Api.find_or_create(name, @fields)
     assert resp["created_at"] == resp2["created_at"]
   end
 
   test "should delete dataset properly", %{dataset: name} do
-    {:ok, resp} = ExGecko.Api.find_or_create(name, @fields)
+    {:ok, _resp} = ExGecko.Api.find_or_create(name, @fields)
     {:ok, %{}} = ExGecko.Api.delete(name)
   end
 
@@ -54,13 +53,13 @@ defmodule ExGeckoTest do
   end
 
   test "should put reqs data properly", %{dataset: name} do
-    {:ok, resp} = ExGecko.Api.create_reqs_dataset(name)
+    {:ok, _resp} = ExGecko.Api.create_reqs_dataset(name)
     {:ok, 1} = ExGecko.Api.put(name, [@data])
   end
 
   test "should batch job of 2000 items", %{dataset: name} do
     batch_data =  get_batch_data(@batch_path)
-    {:ok, resp} = ExGecko.Api.find_or_create(name, @batch_fields)
+    {:ok, _resp} = ExGecko.Api.find_or_create(name, @batch_fields)
     {:ok, 2000}= ExGecko.Api.append(name, batch_data["data"])
   end
 

@@ -16,13 +16,8 @@ defmodule ExGecko.Api do
   Creating URL based on url from config and resources paths
   """
   @spec process_url(String.t) :: String.t
-  def process_url(path) do
-    if String.starts_with?(path, "http") do
-      path
-    else
-      "https://api.geckoboard.com/#{path}"
-    end
-  end
+  def process_url("http" <> _ = path), do: path
+  def process_url(path), do: "https://api.geckoboard.com/#{path}"
 
   @doc """
   Wrapper for PUT requests
