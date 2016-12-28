@@ -110,6 +110,9 @@ defmodule ExGecko.Adapter.Papertrail do
   def _process_metric("status=" <> status), do: %{"status" => status}
   def _process_metric("bytes="), do: %{"size" => 0}
   def _process_metric("bytes=" <> size), do: %{"size" => String.to_integer(size)}
-  def _process_metric("service=" <> speed), do: %{"speed" => (speed |> String.replace("ms", "") |> String.to_integer)}
+  def _process_metric("service=" <> speed), do: %{"speed" => (speed |> String.replace("ms", "") |> intval)}
   def _process_metric(_), do: %{}
+
+  defp intval(""), do: 0
+  defp intval(str), do: String.to_integer(str)
 end
