@@ -10,7 +10,7 @@ You can install ExGecko from hex by specifying `ex_gecko` in your mix.exs depend
 
 ```elixir
 def deps do
-  [{:ex_gecko, "~> 0.0.3"}]
+  [{:ex_gecko, "~> 0.0.5"}]
 end
 ```
 
