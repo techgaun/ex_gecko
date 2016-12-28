@@ -86,11 +86,9 @@ defmodule ExGecko.Adapter.Heroku do
   "2016-08-02T22:22:52+00:00 app[heroku-postgres]: source=HEROKU_POSTGRESQL_PINK sample#current_transaction=4171563.0 sample#db_size=1279201044.0bytes sample#tables=10 sample#active-connections=2 sample#waiting-connections=0 sample#index-cache-hit-rate=0.42019 sample#table-cache-hit-rate=0.78018 sample#load-avg-1m=0.025 sample#load-avg-5m=0.015 sample#load-avg-15m=0.025 sample#read-iops=0 sample#write-iops=0 sample#memory-total=3786332.0kB sample#memory-free=151956kB sample#memory-cached=3286396.0kB sample#memory-postgres=14840kB"
   """
   def parse_line(line, "pg-backup") do
-    # re =
-    # [_, id, backup_start_time, backup_end_time, size, db] =
-    #   Regex.run()
-    [backup_id, backup_start_time, _, backup_end_time, backup_size, backup_db] = line
+    [backup_id, backup_start_time, backup_end_time, backup_size, backup_db] = line
       |> String.split(["  ", "Completed "])
+      |> Enum.filter(&(String.length(&1) > 0))
     %{
       "backup_id" => backup_id,
       "backup_start_time" => pgbackup_timestamp(backup_start_time),
