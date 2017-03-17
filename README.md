@@ -2,7 +2,7 @@
 
 [![Hex version](https://img.shields.io/hexpm/v/ex_gecko.svg "Hex version")](https://hex.pm/packages/ex_gecko) ![Hex downloads](https://img.shields.io/hexpm/dt/ex_gecko.svg "Hex downloads") [![Build Status](https://semaphoreci.com/api/v1/brightergy/ex_gecko/branches/master/badge.svg)](https://semaphoreci.com/brightergy/ex_gecko) [![Coverage Status](https://coveralls.io/repos/github/Brightergy/ex_gecko/badge.svg?branch=master)](https://coveralls.io/github/Brightergy/ex_gecko?branch=master)
 
-Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer-beta.geckoboard.com/).  The SDK is initially based off of the node.js implementation described [here](https://developer-beta.geckoboard.com/nodejs/) and source [here](https://github.com/geckoboard/geckoboard-node)
+Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer.geckoboard.com/). The SDK is initially based off of the node.js implementation described [here](https://developer.geckoboard.com/nodejs/) and source [here](https://github.com/geckoboard/geckoboard-node)
 
 ## Installation
 
@@ -18,14 +18,14 @@ You can install ExGecko from github as well but be aware that the master branch 
 
 ```elixir
 def deps do
-  [{:ex_gecko, github: "Brightergy/ex_gecko"}]
+  [{:ex_gecko, github: "techgaun/ex_gecko"}]
 end
 ```
 
 You can also clone this repository and then run the mix tasks from within the project directory in case you do not wish to make your own separate project.
 
 ```shell
-git clone git@github.com:Brightergy/ex_gecko.git
+git clone git@github.com:techgaun/ex_gecko.git
 mix deps.get
 ```
 
@@ -39,31 +39,33 @@ Be sure you set the environment variable before you use it
 
 or you can run the mix task included here to dump various datapoints into your existing dataset
 
-__Create a new dataset 'mynewdataset' using the datasets/reqs.json format__   
+__Create a new dataset 'mynewdataset' using the datasets/reqs.json format__
+
 `mix gecko.load -d mynewdataset -r reqs`
 
-__Load papertrail data into geckoboard dataset 'mynewdataset'__   
+__Load papertrail data into geckoboard dataset 'mynewdataset'__
+
 `mix gecko.load -t papertrail -d mynewdataset`
 
 __Note : Currently, the Geckboard dataset only supports up to 500 records per request, and this SDK will account for this by limiting the data it will send__
 
 
 ### Examples
-```elixir
 
+```elixir
 # Ensure authentication works
 ExGecko.Api.ping
 
-# Find or create the dataset   
+# Find or create the dataset
 ExGecko.Api.find_or_create("mydataset", %{"fields" => %{"path" => %{"type" => "string", "name" => "Request Path"}, "speed" => %{"type" => "number", "name" => "Request Speed"}}})
 
-# Replace data in dataset   
+# Replace data in dataset
 ExGecko.Api.put("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
 
 # Append data to a dataset
 ExGecko.Api.append("mydataset", [{"timestamp":"2016-07-26T12:00:00Z", "path":"/api/mycall", "speed": 511, "number":1}, {"timestamp":"2016-07-26T12:15:00Z", "path":"/api/myslowcall", "speed": 1532, "number":1}])
 
-# Delete dataset   
+# Delete dataset
 ExGecko.Api.delete("mydataset")
 
 # Create a dataset (using the schema located in datasets/<type>.json)
