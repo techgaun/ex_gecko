@@ -112,9 +112,7 @@ defmodule ExGecko.Adapter.Runscope do
   #
   def step_response_time(uuid, %{"test_run_id" => test_run_id} = opts) do
     "/results/#{test_run_id}/steps/#{uuid}"
-    |> build_url(opts)
-    |> HTTPoison.get(auth_header)
-    |> Parser.parse
+    |> do_get(opts)
     |> case do
         {:ok, %{"data" => step_response}} ->
           if (!is_nil(step_response["response"]["timestamp"]) && !is_nil(step_response["response"]["timestamp"])) do
@@ -129,32 +127,23 @@ defmodule ExGecko.Adapter.Runscope do
   #
   # Wrapper for converting unix time to ISO 8601 string
   #
-  def get_datetime(unix_time) when is_nil(unix_time), do: ""
-  def get_datetime(unix_time) do
-    case unix_time_to_iso(unix_time) do
-      {:ok, iso} -> iso
-      _ -> ""
-    end
-  end
-
-  #
-  # Converts a Unix time float to an ISO 8601 string
-  #
-  def unix_time_to_iso(unix_time) do
+  def get_datetime(unix_time) when is_float(unix_time) do
     unix_time
-    |> Float.floor
-    |> Kernel.+(62167219200)  # convert unix time to gregorian (since year 0)
-    |> Kernel.trunc
-    |> :calendar.gregorian_seconds_to_datetime
-    |> Timex.datetime
-    |> Timex.format("{ISOz}")
+    |> round
+    |> get_datetime
   end
+  def get_datetime(unix_time) when is_integer(unix_time) do
+    unix_time
+    |> DateTime.from_unix!
+    |> DateTime.to_iso8601
+  end
+  def get_datetime(_), do: ""
 
   #
   # Calculates the percentage of tests that have succeeded over the past 24 hours
   #
   def calc_success_ratio(opts) do
-    timestamp = Timex.Convertable.to_unix(Timex.DateTime.now) - 7 * 24 * 60 * 60  # Timestamp for 24 hours ago
+    timestamp = System.system_time(:second) - 86_400
     new_opts = if is_nil(opts), do: %{"since" => timestamp, "count" => 50}, else: Map.merge(%{"since" => timestamp, "count" => 50}, opts)
     case test_results(new_opts) do
       {:ok, %{"data" => results}} -> Enum.reduce(results, 0, fn(result, accum) -> if result["result"] == "pass", do: accum + 1, else: accum end) / Enum.count(results)
@@ -206,27 +195,19 @@ defmodule ExGecko.Adapter.Runscope do
   # Retrieves test details such as name, version, creator, etc
   # Example URL : https://api.runscope.com/buckets/#{BUCKETID}/tests/#{TESTID}
   #
-  def test_detail(opts) do
-    ""
-    |> build_url(opts)
-    |> HTTPoison.get(auth_header)
-    |> Parser.parse
-  end
+  def test_detail(opts), do: do_get("", opts)
 
   #
   # Retrieves the latest result of the test, given test_id, bucket_id in opts
   #
-  def last_result(opts) do
-    "/results/latest"
-    |> build_url(opts)
-    |> HTTPoison.get(auth_header)
-    |> Parser.parse
-  end
+  def last_result(opts), do: do_get("/results/latest", opts)
 
-  def test_results(opts) do
-    "/results"
+  def test_results(opts), do: do_get("/results", opts)
+
+  def do_get(url, opts) do
+    url
     |> build_url(opts)
-    |> HTTPoison.get(auth_header)
+    |> HTTPoison.get(auth_header())
     |> Parser.parse
   end
 
@@ -235,7 +216,7 @@ defmodule ExGecko.Adapter.Runscope do
      |> add_param(opts, "count")
      |> add_param(opts, "since")
 
-     "#{url}/buckets/#{bucket_id}/tests/#{test_id}#{path}#{params}"
+     "#{url()}/buckets/#{bucket_id}/tests/#{test_id}#{path}#{params}"
   end
 
   def build_url(path, opts) when is_nil(opts), do: build_url(path, %{})

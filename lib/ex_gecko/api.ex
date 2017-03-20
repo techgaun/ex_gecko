@@ -26,11 +26,10 @@ defmodule ExGecko.Api do
   """
   @spec update(String.t, map, boolean) :: ExGecko.response
   def update(id, put_data, data \\ false) do
-    req_header = request_header_content_type
     put_data = if put_data |> is_map, do: Poison.encode!(put_data), else: put_data
     id
     |> build_url(data)
-    |> Api.put(put_data, req_header)
+    |> Api.put(put_data, request_header_content_type())
     |> Parser.parse
   end
 
@@ -42,10 +41,9 @@ defmodule ExGecko.Api do
   """
   @spec delete(String.t) :: Brighterx.response
   def delete(id) do
-    req_header = request_header
     id
     |> build_url
-    |> Api.delete(req_header)
+    |> Api.delete(request_header())
     |> Parser.parse
   end
 
@@ -56,11 +54,10 @@ defmodule ExGecko.Api do
   """
   @spec post_request(String.t, map, boolean) :: ExGecko.response
   def post_request(id, data, has_data \\ false) do
-    req_header = request_header_content_type
     data = if data |> is_map, do: Poison.encode!(data), else: data
     id
     |> build_url(has_data)
-    |> Api.post(data, req_header)
+    |> Api.post(data, request_header_content_type())
     |> Parser.parse
   end
 
@@ -75,10 +72,9 @@ defmodule ExGecko.Api do
   """
   @spec ping() :: ExGecko.response
   def ping do
-    req_header = request_header
     nil
     |> build_url
-    |> Api.get(req_header)
+    |> Api.get(request_header())
     |> Parser.parse
   end
   @spec find_or_create(String.t, map) :: ExGecko.response
@@ -236,6 +232,6 @@ defmodule ExGecko.Api do
     end
   end
 
-  def request_header, do: @user_agent ++ auth_header
-  def request_header_content_type, do: @content_type ++ request_header
+  def request_header, do: @user_agent ++ auth_header()
+  def request_header_content_type, do: @content_type ++ request_header()
 end

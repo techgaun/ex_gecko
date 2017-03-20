@@ -3,14 +3,14 @@ defmodule ExGecko.Mixfile do
 
   def project do
     [app: :ex_gecko,
-     version: "0.0.5",
+     version: "0.1.0-dev",
      elixir: "~> 1.2",
      elixirc_paths: ["lib"],
      description: "Elixir SDK to communicate with Geckoboard's API",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps,
-     package: package,
+     deps: deps(),
+     package: package(),
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test, "coveralls.semaphore": :test],
      docs: [logo: "logo/brighterlink_logo.png",
@@ -36,16 +36,13 @@ defmodule ExGecko.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 0.8.0 or ~> 0.9.0"},
-      {:poison, "~> 2.2.0"},
+      {:httpoison, ">= 0.8.0"},
+      {:poison, "~> 3.0"},
       {:porcelain, "~> 2.0"},
-      {:excoveralls, "~> 0.5.4", only: :test},
-      {:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.11", only: :dev},
+      {:excoveralls, "~> 0.6", only: :test},
+      {:ex_doc, "~> 0.15", only: :dev},
       {:dogma, "~> 0.1", only: [:dev, :test]},
-      {:mock, "~> 0.1.1", only: :test},
-      {:timex, "~> 2.1.4"},
-      {:tzdata, "~> 0.5.8"}
+      {:mock, "~> 0.2.1", only: :test}
     ]
   end
 
