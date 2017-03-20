@@ -1,6 +1,6 @@
 # ex_gecko
 
-[![Hex version](https://img.shields.io/hexpm/v/ex_gecko.svg "Hex version")](https://hex.pm/packages/ex_gecko) ![Hex downloads](https://img.shields.io/hexpm/dt/ex_gecko.svg "Hex downloads") [![Build Status](https://semaphoreci.com/api/v1/brightergy/ex_gecko/branches/master/badge.svg)](https://semaphoreci.com/brightergy/ex_gecko) [![Coverage Status](https://coveralls.io/repos/github/Brightergy/ex_gecko/badge.svg?branch=master)](https://coveralls.io/github/Brightergy/ex_gecko?branch=master)
+[![Hex version](https://img.shields.io/hexpm/v/ex_gecko.svg "Hex version")](https://hex.pm/packages/ex_gecko) ![Hex downloads](https://img.shields.io/hexpm/dt/ex_gecko.svg "Hex downloads") [![Build Status](https://travis-ci.org/techgaun/ex_gecko.svg?branch=master)](https://travis-ci.org/techgaun/ex_gecko)
 
 Elixir SDK to communicate with Geckoboard API, primarily with their new API for [datasets](https://developer.geckoboard.com/). The SDK is initially based off of the node.js implementation described [here](https://developer.geckoboard.com/nodejs/) and source [here](https://github.com/geckoboard/geckoboard-node)
 
