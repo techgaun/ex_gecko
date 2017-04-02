@@ -13,8 +13,7 @@ defmodule ExGecko.Mixfile do
      package: package(),
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test, "coveralls.semaphore": :test],
-     docs: [logo: "logo/brighterlink_logo.png",
-            extras: ["README.md"]]
+     docs: [extras: ["README.md"]]
    ]
   end
 
