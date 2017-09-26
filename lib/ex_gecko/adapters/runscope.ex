@@ -115,7 +115,7 @@ defmodule ExGecko.Adapter.Runscope do
     |> do_get(opts)
     |> case do
         {:ok, %{"data" => step_response}} ->
-          if (!is_nil(step_response["response"]["timestamp"]) && !is_nil(step_response["response"]["timestamp"])) do
+          if (!is_nil(step_response["response"]["timestamp"])) do
             {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
           else
             {:error, ""}

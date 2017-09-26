@@ -16,11 +16,11 @@ defmodule ExGecko.Adapter.Heroku do
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
   def load_events(opts) when is_bitstring(opts) do
-    new_opts = opts
+    opts
     |> String.split(",")
     |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
     |> Map.new
-    load_events(new_opts)
+    |> load_events
   end
 
   def load_events(%{"app" => app, "lines" => lines, "type" => type} = _opts) do
@@ -167,7 +167,7 @@ defmodule ExGecko.Adapter.Heroku do
   defp bytes_to_mb(str) do
     str
     |> float_value
-    |> Kernel./(1048576)
+    |> Kernel./(1_048_576)
   end
   defp kb_to_mb(str) do
     str
