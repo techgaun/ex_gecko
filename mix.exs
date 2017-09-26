@@ -3,7 +3,7 @@ defmodule ExGecko.Mixfile do
 
   def project do
     [app: :ex_gecko,
-     version: "0.1.0",
+     version: "0.1.1",
      elixir: "~> 1.2",
      elixirc_paths: ["lib"],
      description: "Elixir SDK to communicate with Geckoboard's API",
@@ -40,8 +40,8 @@ defmodule ExGecko.Mixfile do
       {:porcelain, "~> 2.0"},
       {:excoveralls, "~> 0.6", only: :test},
       {:ex_doc, "~> 0.15", only: :dev},
-      {:dogma, "~> 0.1", only: [:dev, :test]},
-      {:mock, "~> 0.2.1", only: :test}
+      {:mock, "~> 0.2.1", only: :test},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false}
     ]
   end
 

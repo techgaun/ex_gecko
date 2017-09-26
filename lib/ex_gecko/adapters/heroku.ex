@@ -94,7 +94,7 @@ defmodule ExGecko.Adapter.Heroku do
       "backup_start_time" => pgbackup_timestamp(backup_start_time),
       "backup_end_time" => pgbackup_timestamp(backup_end_time),
       "backup_size" => float_value(backup_size),
-      "backup_db" => String.strip(backup_db)
+      "backup_db" => String.trim(backup_db)
     }
   end
   def parse_line(line, _) do

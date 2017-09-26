@@ -99,7 +99,7 @@ defmodule ExGecko.Adapter.Papertrail do
   def process_data(data) do
     timestamp = data["received_at"]
     data["message"]
-    |> String.strip
+    |> String.trim
     |> String.split(" ")
     |> Enum.reduce(%{"timestamp" => timestamp}, fn x, acc ->
       Map.merge(acc, _process_metric(x))
