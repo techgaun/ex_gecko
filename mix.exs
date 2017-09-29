@@ -53,7 +53,7 @@ defmodule ExGecko.Mixfile do
       ],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/techgaun/ex_gecko"},
-      files: ~w(config datasets lib logo mix.exs README.md)
+      files: ~w(config datasets lib mix.exs README.md)
     ]
   end
 end
