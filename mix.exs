@@ -21,7 +21,7 @@ defmodule ExGecko.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :porcelain, :tzdata]]
+    [applications: [:logger, :httpoison, :porcelain]]
   end
 
   # Dependencies can be Hex packages:
