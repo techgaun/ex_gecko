@@ -5,6 +5,11 @@
       "name": "Request Path",
       "optional": false
     },
+    "path": {
+      "type": "string",
+      "name": "Request Method",
+      "optional": true
+    },
     "speed": {
       "type": "number",
       "name": "Request Speed",
@@ -24,6 +29,11 @@
       "type": "datetime",
       "name": "Date",
       "optional": false
+    },
+    "user_id": {
+      "type": "string",
+      "name": "User ID",
+      "optional": true
     }
   }
 }

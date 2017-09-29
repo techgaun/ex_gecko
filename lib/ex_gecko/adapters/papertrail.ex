@@ -104,6 +104,7 @@ defmodule ExGecko.Adapter.Papertrail do
     |> Enum.reduce(%{"timestamp" => timestamp}, fn x, acc ->
       Map.merge(acc, _process_metric(x))
     end)
+    |> IO.inspect
   end
 
   def _process_metric("path=" <> path), do: %{"path" => (path |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99))}
@@ -111,7 +112,16 @@ defmodule ExGecko.Adapter.Papertrail do
   def _process_metric("bytes="), do: %{"size" => 0}
   def _process_metric("bytes=" <> size), do: %{"size" => String.to_integer(size)}
   def _process_metric("service=" <> speed), do: %{"speed" => (speed |> String.replace("ms", "") |> intval)}
+  def _process_metric(~s({") <> _ = json) do
+    case Poison.decode(json) do
+      {:ok, json} ->
+        _process_json_metric(json)
+      _ -> %{}
+    end
+  end
   def _process_metric(_), do: %{}
+
+  def _process_json_metric(_), do: %{}
 
   defp intval(""), do: 0
   defp intval(str), do: String.to_integer(str)
