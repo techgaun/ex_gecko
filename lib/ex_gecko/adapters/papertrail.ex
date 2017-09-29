@@ -115,13 +115,44 @@ defmodule ExGecko.Adapter.Papertrail do
   def _process_metric(~s({") <> _ = json) do
     case Poison.decode(json) do
       {:ok, json} ->
-        _process_json_metric(json)
+        _process_json_metric(json, %{})
       _ -> %{}
     end
   end
   def _process_metric(_), do: %{}
 
-  def _process_json_metric(_), do: %{}
+  def _process_json_metric(%{"status" => status} = json, acc) do
+    _process_json_metric(
+      Map.drop(json, ~w(status)), Map.put(acc, "status", status)
+    )
+  end
+  def _process_json_metric(%{"path" => path} = json, acc) do
+    _process_json_metric(
+      Map.drop(json, ~w(path)), Map.put(acc, "path", path)
+    )
+  end
+  def _process_json_metric(%{"duration" => speed} = json, acc) do
+    _process_json_metric(
+      Map.drop(json, ~w(duration)), Map.put(acc, "speed", speed)
+    )
+  end
+  def _process_json_metric(%{"user_id" => user_id} = json, acc) do
+    user_id = if is_binary(user_id), do: user_id, else: "anonymous"
+    _process_json_metric(
+      Map.drop(json, ~w(user_id)), Map.put(acc, "user_id", user_id)
+    )
+  end
+  def _process_json_metric(%{"method" => method} = json, acc) do
+    _process_json_metric(
+      Map.drop(json, ~w(method)), Map.put(acc, "method", method)
+    )
+  end
+  def _process_json_metric(%{"date_time" => time} = json, acc) do
+    _process_json_metric(
+      Map.drop(json, ~w(date_time)), Map.put(acc, "timestamp", time)
+    )
+  end
+  def _process_json_metric(_, acc), do: acc
 
   defp intval(""), do: 0
   defp intval(str), do: String.to_integer(str)

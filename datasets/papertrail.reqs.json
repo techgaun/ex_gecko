@@ -5,7 +5,7 @@
       "name": "Request Path",
       "optional": false
     },
-    "path": {
+    "method": {
       "type": "string",
       "name": "Request Method",
       "optional": true
