@@ -109,13 +109,18 @@ defmodule ExGecko.Adapter.Papertrail do
 
   def _process_metric("path=" <> path), do: %{"path" => (path |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99))}
   def _process_metric("status=" <> status), do: %{"status" => status}
+  def _process_metric("method=" <> method), do: %{"method" => method}
   def _process_metric("bytes="), do: %{"size" => 0}
   def _process_metric("bytes=" <> size), do: %{"size" => String.to_integer(size)}
   def _process_metric("service=" <> speed), do: %{"speed" => (speed |> String.replace("ms", "") |> intval)}
   def _process_metric(~s({") <> _ = json) do
     case Poison.decode(json) do
       {:ok, json} ->
-        _process_json_metric(json, %{})
+        if String.downcase(json["method"]) == "options" do
+          %{}
+        else
+          _process_json_metric(json, %{})
+        end
       _ -> %{}
     end
   end
@@ -123,7 +128,7 @@ defmodule ExGecko.Adapter.Papertrail do
 
   def _process_json_metric(%{"status" => status} = json, acc) do
     _process_json_metric(
-      Map.drop(json, ~w(status)), Map.put(acc, "status", status)
+      Map.drop(json, ~w(status)), Map.put(acc, "status", "#{status}")
     )
   end
   def _process_json_metric(%{"path" => path} = json, acc) do
@@ -143,6 +148,7 @@ defmodule ExGecko.Adapter.Papertrail do
     )
   end
   def _process_json_metric(%{"method" => method} = json, acc) do
+    method = String.upcase(method)
     _process_json_metric(
       Map.drop(json, ~w(method)), Map.put(acc, "method", method)
     )

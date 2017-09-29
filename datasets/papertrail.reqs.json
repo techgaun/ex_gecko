@@ -8,7 +8,7 @@
     "method": {
       "type": "string",
       "name": "Request Method",
-      "optional": true
+      "optional": false
     },
     "speed": {
       "type": "number",
@@ -18,7 +18,7 @@
     "size": {
       "type": "number",
       "name": "Request Size",
-      "optional": false
+      "optional": true
     },
     "status" : {
       "type" : "string",
@@ -33,7 +33,7 @@
     "user_id": {
       "type": "string",
       "name": "User ID",
-      "optional": true
+      "optional": false
     }
   }
 }
