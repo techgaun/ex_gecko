@@ -27,9 +27,13 @@ defmodule ExGecko.Adapter.Papertrail do
     case Porcelain.exec("papertrail", build_args(opts)) do
       %{status: 0, out: output} ->
         lines = output |> String.split("\n")
-        for line <- lines,
+        items =
+          for line <- lines,
             data = decode_line(line),
             valid?(data), into: [], do: process_data(data)
+
+        items
+        |> Enum.reject(&(map_size(&1) < 3))
       %{status: status, err: message} ->
         IO.puts "error executing command, #{status}, #{message}"
         []
@@ -104,7 +108,6 @@ defmodule ExGecko.Adapter.Papertrail do
     |> Enum.reduce(%{"timestamp" => timestamp}, fn x, acc ->
       Map.merge(acc, _process_metric(x))
     end)
-    |> IO.inspect
   end
 
   def _process_metric("path=" <> path), do: %{"path" => (path |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99))}
