@@ -111,6 +111,10 @@ mix gecko.load -d api.reqs -r papertrail.reqs # create dataset for papertrail re
 mix gecko.load -d api-reqs -t papertrail # load data to datasets
 ```
 
+Papertrail adapter supports either of heroku router data format or the
+[plug_logger_json](https://github.com/bleacherreport/plug_logger_json) data format. The `user_id` field in papertrail
+dataset definition is used to co-relate the requests with the user.
+
 #### Heroku
 
 The heroku adapter requires [heroku-cli](https://github.com/heroku/heroku) to be installed. Once you configure heroku, you can use heroku adapter as below:
