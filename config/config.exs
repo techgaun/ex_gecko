@@ -2,7 +2,8 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-config :porcelain, driver: Porcelain.Driver.Basic
+config :porcelain, driver: Porcelain.Driver.Basic,
+  goon_warn_if_missing: false
 
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
