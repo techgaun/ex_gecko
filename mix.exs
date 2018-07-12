@@ -2,19 +2,26 @@ defmodule ExGecko.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :ex_gecko,
-     version: "0.1.1",
-     elixir: "~> 1.2",
-     elixirc_paths: ["lib"],
-     description: "Elixir SDK to communicate with Geckoboard's API",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps(),
-     package: package(),
-     test_coverage: [tool: ExCoveralls],
-     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test, "coveralls.semaphore": :test],
-     docs: [extras: ["README.md"]]
-   ]
+    [
+      app: :ex_gecko,
+      version: "0.1.1",
+      elixir: "~> 1.2",
+      elixirc_paths: ["lib"],
+      description: "Elixir SDK to communicate with Geckoboard's API",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      deps: deps(),
+      package: package(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.semaphore": :test
+      ],
+      docs: [extras: ["README.md"]]
+    ]
   end
 
   # Configuration for the OTP application

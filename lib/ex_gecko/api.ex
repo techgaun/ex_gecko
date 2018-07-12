@@ -15,7 +15,7 @@ defmodule ExGecko.Api do
   @doc """
   Creating URL based on url from config and resources paths
   """
-  @spec process_url(String.t) :: String.t
+  @spec process_url(String.t()) :: String.t()
   def process_url("http" <> _ = path), do: path
   def process_url(path), do: "https://api.geckoboard.com/#{path}"
 
@@ -24,13 +24,14 @@ defmodule ExGecko.Api do
 
   Examples
   """
-  @spec update(String.t, map, boolean) :: ExGecko.response
+  @spec update(String.t(), map, boolean) :: ExGecko.response()
   def update(id, put_data, data \\ false) do
     put_data = if put_data |> is_map, do: Poison.encode!(put_data), else: put_data
+
     id
     |> build_url(data)
     |> Api.put(put_data, request_header_content_type())
-    |> Parser.parse
+    |> Parser.parse()
   end
 
   @doc """
@@ -39,12 +40,12 @@ defmodule ExGecko.Api do
   Examples
   - ExGecko.Api.delete("mydataset")
   """
-  @spec delete(String.t) :: Brighterx.response
+  @spec delete(String.t()) :: Brighterx.response()
   def delete(id) do
     id
     |> build_url
     |> Api.delete(request_header())
-    |> Parser.parse
+    |> Parser.parse()
   end
 
   @doc """
@@ -52,13 +53,14 @@ defmodule ExGecko.Api do
 
   Examples
   """
-  @spec post_request(String.t, map, boolean) :: ExGecko.response
+  @spec post_request(String.t(), map, boolean) :: ExGecko.response()
   def post_request(id, data, has_data \\ false) do
     data = if data |> is_map, do: Poison.encode!(data), else: data
+
     id
     |> build_url(has_data)
     |> Api.post(data, request_header_content_type())
-    |> Parser.parse
+    |> Parser.parse()
   end
 
   @doc """
@@ -70,17 +72,18 @@ defmodule ExGecko.Api do
   - ExGecko.Api.put - replaces all data in the dataset
   - ExGecko.Api.delete - deletes the dataset and data therein
   """
-  @spec ping() :: ExGecko.response
+  @spec ping() :: ExGecko.response()
   def ping do
     nil
     |> build_url
     |> Api.get(request_header())
-    |> Parser.parse
+    |> Parser.parse()
   end
-  @spec find_or_create(String.t, map) :: ExGecko.response
+
+  @spec find_or_create(String.t(), map) :: ExGecko.response()
   def find_or_create(id, fields), do: update(id, fields, false)
 
-  @spec put(String.t, list) :: ExGecko.response
+  @spec put(String.t(), list) :: ExGecko.response()
   # Need to handle batch job, redirect to append
   def put(id, data) when is_list(data) and length(data) > 500 do
     append(id, data)
@@ -89,13 +92,17 @@ defmodule ExGecko.Api do
   def put(id, data) when is_list(data) do
     put(id, %{"data" => data})
   end
+
   def put(id, data) when is_map(data) do
     resp = update(id, data, true)
+
     case resp do
       {:ok, %{}} ->
         count = length(data["data"])
         {:ok, count}
-      _ -> resp
+
+      _ ->
+        resp
     end
   end
 
@@ -105,19 +112,26 @@ defmodule ExGecko.Api do
 
   Example
   """
-  @spec append(String.t, map) :: ExGecko.response
+  @spec append(String.t(), map) :: ExGecko.response()
   def append(id, data) when is_list(data) and length(data) > 5000 do
-    IO.puts "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{length(data)} to 5000"
-    append(id, (data |> limit_data))
+    IO.puts(
+      "Currently the Geckoboard datasets cannot hold more than 5000 events, reducing events sent from #{
+        length(data)
+      } to 5000"
+    )
+
+    append(id, data |> limit_data)
   end
 
   def append(id, data) when is_list(data) and 500 < length(data) and length(data) <= 5000 do
     data
-    |> Enum.chunk(500, 500, [])                   # break into the maximum request size, send individually
+    # break into the maximum request size, send individually
+    |> Enum.chunk(500, 500, [])
     |> Enum.reduce({:ok, 0}, fn x, {_status, val} ->
       case append(id, x) do
         {:ok, count} ->
           {:ok, val + count}
+
         _ ->
           {:error, 0}
       end
@@ -130,11 +144,14 @@ defmodule ExGecko.Api do
 
   def append(id, data) when is_map(data) do
     resp = post_request(id, data, true)
+
     case resp do
       {:ok, %{}} ->
         count = length(data["data"])
         {:ok, count}
-      _ -> resp
+
+      _ ->
+        resp
     end
   end
 
@@ -151,14 +168,15 @@ defmodule ExGecko.Api do
         }
       }
   """
-  @spec push(String.t, map) :: ExGecko.response
+  @spec push(String.t(), map) :: ExGecko.response()
   def push(widget_key, data) do
     api_key = System.get_env("GECKO_API_KEY")
-    post_data = %{"api_key" => api_key, "data" => data} |> Poison.encode!
+    post_data = %{"api_key" => api_key, "data" => data} |> Poison.encode!()
+
     widget_key
     |> build_url(:push)
     |> Api.post(post_data, @content_type)
-    |> Parser.parse
+    |> Parser.parse()
   end
 
   @doc """
@@ -177,26 +195,29 @@ defmodule ExGecko.Api do
       }
   """
   def push_monitor(widget_key, status, down_time \\ "", response_time \\ "") do
-    push(widget_key, %{"status" => format_status(status), "downTime" => down_time, "responseTime" => response_time})
+    push(widget_key, %{
+      "status" => format_status(status),
+      "downTime" => down_time,
+      "responseTime" => response_time
+    })
   end
 
   def format_status(:up), do: "Up"
   def format_status(:down), do: "Down"
   def format_status(status) when is_bitstring(status), do: String.capitalize(status)
 
-  @spec create_reqs_dataset(String.t) :: ExGecko.response
+  @spec create_reqs_dataset(String.t()) :: ExGecko.response()
   def create_reqs_dataset(id), do: create_dataset(id, "papertrail.reqs")
-  @spec create_dataset(String.t, String.t) :: ExGecko.response
+  @spec create_dataset(String.t(), String.t()) :: ExGecko.response()
   def create_dataset(id, type \\ "reqs") do
-    {:ok, fields} = "datasets/#{type}.json" |> File.read
+    {:ok, fields} = "datasets/#{type}.json" |> File.read()
     find_or_create(id, fields)
   end
-
 
   @doc """
   Builds URL based on the resource, id and parameters
   """
-  @spec build_url(String.t) :: String.t
+  @spec build_url(String.t()) :: String.t()
   def build_url(nil), do: "/"
   def build_url(id), do: "/datasets/#{id}"
   def build_url(id, true), do: build_url(id) <> "/data"
@@ -212,11 +233,10 @@ defmodule ExGecko.Api do
   @spec limit_data(list) :: list
   def limit_data(events) do
     events
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.slice(0..4999)
-    |> Enum.reverse
+    |> Enum.reverse()
   end
-
 
   @doc """
   Add header with username
@@ -224,6 +244,7 @@ defmodule ExGecko.Api do
   """
   def auth_header do
     api_key = System.get_env("GECKO_API_KEY")
+
     if is_nil(api_key) do
       raise "Geckoboard API Key is missing"
     else

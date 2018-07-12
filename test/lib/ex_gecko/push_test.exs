@@ -22,6 +22,4 @@ defmodule ExGecko.PushTest do
     resp = ExGecko.Api.push_monitor(@monitor_key, :down, "2 days ago", "500ms")
     assert {:ok, %{}} = resp
   end
-
 end
-

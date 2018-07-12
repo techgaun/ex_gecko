@@ -3,10 +3,10 @@ defmodule ExGecko.Adapter.RunscopeTest do
   alias ExGecko.Adapter.Runscope
   doctest ExGecko.Adapter.Runscope
 
-  @unix 1478133443.0
+  @unix 1_478_133_443.0
 
   test "should convert unix time to ISO 8601 string" do
-  	resp = Runscope.get_datetime(@unix)
-  	assert "2016-11-03T00:37:23Z" == resp
+    resp = Runscope.get_datetime(@unix)
+    assert "2016-11-03T00:37:23Z" == resp
   end
 end

@@ -29,11 +29,19 @@ defmodule Mix.Tasks.Gecko.Load do
 
   @doc false
   def run(args) do
-
-    {opts, _, _} = OptionParser.parse(args,
-      switches: [dataset: :string, type: :string, reset: :string, widget: :string, args: :string],
-      aliases: [d: :dataset, t: :type, r: :reset, a: :args, w: :widget]
+    {opts, _, _} =
+      OptionParser.parse(
+        args,
+        switches: [
+          dataset: :string,
+          type: :string,
+          reset: :string,
+          widget: :string,
+          args: :string
+        ],
+        aliases: [d: :dataset, t: :type, r: :reset, a: :args, w: :widget]
       )
+
     Application.ensure_all_started(:httpoison)
     Application.ensure_all_started(:tzdata)
 
@@ -41,23 +49,34 @@ defmodule Mix.Tasks.Gecko.Load do
     # Providing a widget key to update a widget is a legacy system for Geckoboard
     # Otherwise, provide a dataset name
     case opts[:widget] do
-      nil ->                            # if no widget flag, we're using datasets
+      # if no widget flag, we're using datasets
+      nil ->
         case opts[:reset] do
           nil -> _run(opts[:dataset], opts[:type], opts[:args])
           _ -> reset_dataset(opts[:reset], opts[:dataset])
         end
-      _ -> _run(opts[:widget], opts[:type], opts[:args], :widget)
+
+      _ ->
+        _run(opts[:widget], opts[:type], opts[:args], :widget)
     end
   end
 
-  def log(msg), do: IO.puts msg
+  def log(msg), do: IO.puts(msg)
 
-  def _run(dataset, _type, _args) when is_nil(dataset), do: log("No 'dataset' or 'widget' was provided, please use the --dataset/-d or --widget/-w switch statement'")
-  def _run(_dataset, type, _args) when is_nil(type), do: log("No 'type' was provided, please use the --type/-t switch statement'")
+  def _run(dataset, _type, _args) when is_nil(dataset),
+    do:
+      log(
+        "No 'dataset' or 'widget' was provided, please use the --dataset/-d or --widget/-w switch statement'"
+      )
+
+  def _run(_dataset, type, _args) when is_nil(type),
+    do: log("No 'type' was provided, please use the --type/-t switch statement'")
+
   def _run(dataset, "papertrail", args) do
     events = ExGecko.Adapter.Papertrail.load_events(args)
     update_data(dataset, events)
   end
+
   def _run(dataset, "heroku", args) do
     events = ExGecko.Adapter.Heroku.load_events(args)
     put_data(dataset, events)
@@ -76,13 +95,16 @@ defmodule Mix.Tasks.Gecko.Load do
 
   def _run(widget, "runscope", args, :widget) do
     {:ok, {status, down_time, response_time}} = ExGecko.Adapter.Runscope.uptime(args)
+
     case ExGecko.Api.push_monitor(widget, status, down_time, response_time) do
-      {:ok, %{"success" => true}} -> IO.puts "successfully updated monitor widget"
-      _ -> IO.puts "could not update widget"
+      {:ok, %{"success" => true}} -> IO.puts("successfully updated monitor widget")
+      _ -> IO.puts("could not update widget")
     end
   end
 
-  def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "", do: log("Dataset name can not be blank")
+  def reset_dataset(_type, dataset) when is_nil(dataset) or dataset == "",
+    do: log("Dataset name can not be blank")
+
   def reset_dataset(schema, dataset) do
     log("Deleting the dataset '#{dataset}'")
     # delete will fail if it doesn't exist, continue so we can create the new dataset
@@ -95,20 +117,25 @@ defmodule Mix.Tasks.Gecko.Load do
 
   def update_data(dataset, events) do
     log("loading #{length(events)} events to #{dataset}")
+
     case ExGecko.Api.append(dataset, events) do
       {:ok, count} ->
         log("successfully loaded #{count} events")
+
       {:error, error, code} ->
         log("HTTP Error #{code} (#{error}) loading data points")
     end
   end
 
   def put_data(_dataset, events) when length(events) == 0, do: log("No events to load")
+
   def put_data(dataset, events) do
     log("loading #{length(events)} events to #{dataset}")
+
     case ExGecko.Api.put(dataset, events) do
       {:ok, count} ->
         log("successfully loaded #{count} events")
+
       {:error, error, code} ->
         log("HTTP Error #{code} (#{error}) loading data points")
     end

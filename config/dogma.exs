@@ -6,7 +6,7 @@ alias Dogma.Rule
 config :dogma,
   rule_set: Dogma.RuleSet.All,
   exclude: [
-    ~r(\Apriv/|\Atest/),
+    ~r(\Apriv/|\Atest/)
   ],
   override: [
     %Rule.LineLength{enabled: false}

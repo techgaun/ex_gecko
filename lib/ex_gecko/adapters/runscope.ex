@@ -19,6 +19,7 @@ defmodule ExGecko.Adapter.Runscope do
   def url, do: "https://api.runscope.com"
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
+
   def load_events(opts) when is_bitstring(opts) do
     opts
     |> parse_args
@@ -36,18 +37,21 @@ defmodule ExGecko.Adapter.Runscope do
         avg_response_time = find_response_time(last)
         name = get_test_name(opts)
         assertion_success_ratio = last["assertions_passed"] / last["assertions_defined"]
+
         event = %{
-                  "test_id" => test_id,
-                  "name" => name,
-                  "last_status" => last_status,
-                  "last_test_date" => last_test_date,
-                  "success_ratio" => success_ratio,
-                  "avg_response_time" => avg_response_time,
-                  "assertion_success_ratio" => assertion_success_ratio
-                }
+          "test_id" => test_id,
+          "name" => name,
+          "last_status" => last_status,
+          "last_test_date" => last_test_date,
+          "success_ratio" => success_ratio,
+          "avg_response_time" => avg_response_time,
+          "assertion_success_ratio" => assertion_success_ratio
+        }
+
         {:ok, event}
 
-      _ -> {:error, ""}
+      _ ->
+        {:error, ""}
     end
   end
 
@@ -55,10 +59,9 @@ defmodule ExGecko.Adapter.Runscope do
   def parse_args(opts) do
     opts
     |> String.split(",")
-    |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
-    |> Map.new
+    |> Enum.map(fn key -> String.split(key, "=", parts: 2) |> List.to_tuple() end)
+    |> Map.new()
   end
-
 
   def get_test_name(opts) do
     case test_detail(opts) do
@@ -71,28 +74,37 @@ defmodule ExGecko.Adapter.Runscope do
   # Function Returns the average response time across all requests of the test
   #
   def find_response_time(test_run) do
-    time = test_run
+    time =
+      test_run
       |> Map.get("requests")
-      |> Enum.filter(fn(request) -> not is_nil(request["url"]) end)     # some returned steps are not actually in the test routine and have nil urls
-      |> Enum.map((fn(request) -> request["uuid"] end))
+      # some returned steps are not actually in the test routine and have nil urls
+      |> Enum.filter(fn request -> not is_nil(request["url"]) end)
+      |> Enum.map(fn request -> request["uuid"] end)
       |> avg_step_response(%{:sum => 0, :num_steps => 0}, test_run)
-
 
     if is_nil(time) do
       ""
     else
-      Float.round(time, 2) # use 2 digits of precision
+      # use 2 digits of precision
+      Float.round(time, 2)
     end
   end
 
   #
   # Determines total run time of test, by recursively iterating through steps
   #
-  def avg_step_response([head | tail], %{sum: sum, num_steps: num_steps} , test_run) do
+  def avg_step_response([head | tail], %{sum: sum, num_steps: num_steps}, test_run) do
     case step_response_time(head, test_run) do
-      {:ok, %{:response_time => response_time}} -> avg_step_response(tail, %{:sum => (sum + response_time), :num_steps => (num_steps + 1)}, test_run)
+      {:ok, %{:response_time => response_time}} ->
+        avg_step_response(
+          tail,
+          %{:sum => sum + response_time, :num_steps => num_steps + 1},
+          test_run
+        )
+
       # If Http request to retrieve the response time fails, do not add to the average
-      _ -> avg_step_response(tail, %{:sum => sum, :num_steps => num_steps}, test_run)
+      _ ->
+        avg_step_response(tail, %{:sum => sum, :num_steps => num_steps}, test_run)
     end
   end
 
@@ -103,7 +115,7 @@ defmodule ExGecko.Adapter.Runscope do
     if num_steps == 0 do
       nil
     else
-      (sum / num_steps) * 1000
+      sum / num_steps * 1000
     end
   end
 
@@ -114,13 +126,19 @@ defmodule ExGecko.Adapter.Runscope do
     "/results/#{test_run_id}/steps/#{uuid}"
     |> do_get(opts)
     |> case do
-        {:ok, %{"data" => step_response}} ->
-          if (!is_nil(step_response["response"]["timestamp"])) do
-            {:ok, %{ :response_time => (step_response["response"]["timestamp"] - step_response["request"]["timestamp"])} }
-          else
-            {:error, ""}
-          end
-        _ -> {:error, ""}
+      {:ok, %{"data" => step_response}} ->
+        if !is_nil(step_response["response"]["timestamp"]) do
+          {:ok,
+           %{
+             :response_time =>
+               step_response["response"]["timestamp"] - step_response["request"]["timestamp"]
+           }}
+        else
+          {:error, ""}
+        end
+
+      _ ->
+        {:error, ""}
     end
   end
 
@@ -132,11 +150,13 @@ defmodule ExGecko.Adapter.Runscope do
     |> round
     |> get_datetime
   end
+
   def get_datetime(unix_time) when is_integer(unix_time) do
     unix_time
-    |> DateTime.from_unix!
-    |> DateTime.to_iso8601
+    |> DateTime.from_unix!()
+    |> DateTime.to_iso8601()
   end
+
   def get_datetime(_), do: ""
 
   #
@@ -144,52 +164,66 @@ defmodule ExGecko.Adapter.Runscope do
   #
   def calc_success_ratio(opts) do
     timestamp = System.system_time(:second) - 86_400
-    new_opts = if is_nil(opts), do: %{"since" => timestamp, "count" => 50}, else: Map.merge(%{"since" => timestamp, "count" => 50}, opts)
+
+    new_opts =
+      if is_nil(opts),
+        do: %{"since" => timestamp, "count" => 50},
+        else: Map.merge(%{"since" => timestamp, "count" => 50}, opts)
+
     case test_results(new_opts) do
-      {:ok, %{"data" => results}} -> Enum.reduce(results, 0, fn(result, accum) -> if result["result"] == "pass", do: accum + 1, else: accum end) / Enum.count(results)
-      _ -> {:error, ""}
+      {:ok, %{"data" => results}} ->
+        Enum.reduce(results, 0, fn result, accum ->
+          if result["result"] == "pass", do: accum + 1, else: accum
+        end) / Enum.count(results)
+
+      _ ->
+        {:error, ""}
     end
   end
-
 
   #
   # Prepares a request matching the Geckoboard Legacy Uptime widget
   #
   def uptime(args) do
     opts = parse_args(args)
+
     case last_result(opts) do
       {:ok, %{"data" => last}} ->
         status = if last["result"] == "pass", do: :up, else: :down
         {:ok, {status, find_last_down(last, opts), find_response_time(last)}}
-      _ -> {:error, ""}
+
+      _ ->
+        {:error, ""}
     end
   end
 
-
   def find_last_down(last, opts) do
-    result = if last["result"] != "pass" do
-      # use the finished_at time for the last time it was down
-      last
-    else
-      new_opts = if is_nil(opts), do: %{"count" => 50}, else: Map.merge(%{"count" => 50}, opts)
-      {:ok, %{"data" => results}} = test_results(new_opts)
-      Enum.find(results, fn(result) -> result["result"] != "pass" end)
-    end
+    result =
+      if last["result"] != "pass" do
+        # use the finished_at time for the last time it was down
+        last
+      else
+        new_opts = if is_nil(opts), do: %{"count" => 50}, else: Map.merge(%{"count" => 50}, opts)
+        {:ok, %{"data" => results}} = test_results(new_opts)
+        Enum.find(results, fn result -> result["result"] != "pass" end)
+      end
+
     convert_to_ago(result)
   end
 
   def convert_to_ago(result) when is_nil(result), do: ""
+
   def convert_to_ago(result) do
     time = result["finished_at"]
     ago = Float.round(:os.system_time(:seconds) - time, 2)
+
     cond do
-       ago < 60 -> "#{Float.round(ago,2)} seconds ago"
-       ago < (60 * 60) -> "#{Float.round(ago/60,2)} minutes ago"
-       ago < (60 * 60 * 24) -> "#{Float.round(ago/3600,1)} hours ago"
-       true -> "#{Float.round(ago/86400,1)} days ago"
+      ago < 60 -> "#{Float.round(ago, 2)} seconds ago"
+      ago < 60 * 60 -> "#{Float.round(ago / 60, 2)} minutes ago"
+      ago < 60 * 60 * 24 -> "#{Float.round(ago / 3600, 1)} hours ago"
+      true -> "#{Float.round(ago / 86400, 1)} days ago"
     end
   end
-
 
   #
   # Retrieves test details such as name, version, creator, etc
@@ -208,33 +242,46 @@ defmodule ExGecko.Adapter.Runscope do
     url
     |> build_url(opts)
     |> HTTPoison.get(auth_header())
-    |> Parser.parse
+    |> Parser.parse()
   end
 
   def build_url(path, %{"bucket_id" => bucket_id, "test_id" => test_id} = opts) do
-     params = ""
-     |> add_param(opts, "count")
-     |> add_param(opts, "since")
+    params =
+      ""
+      |> add_param(opts, "count")
+      |> add_param(opts, "since")
 
-     "#{url()}/buckets/#{bucket_id}/tests/#{test_id}#{path}#{params}"
+    "#{url()}/buckets/#{bucket_id}/tests/#{test_id}#{path}#{params}"
   end
 
   def build_url(path, opts) when is_nil(opts), do: build_url(path, %{})
-  def build_url(path, opts), do: build_url(path, Map.merge(opts, %{"bucket_id" => "to5q0u5gglr4", "test_id" => "d8bb2a75-828f-4f5d-92fb-d313f38f691b"}))
 
+  def build_url(path, opts),
+    do:
+      build_url(
+        path,
+        Map.merge(opts, %{
+          "bucket_id" => "to5q0u5gglr4",
+          "test_id" => "d8bb2a75-828f-4f5d-92fb-d313f38f691b"
+        })
+      )
 
   #
   # If the given param is a key in the options map, appends the value to the param_string
   #
   def add_param(param_string, opts, param) do
     case opts[param] do
-       nil -> param_string
-       val -> if param_string == "", do: "?#{param}=#{val}", else: param_string <> "&{param}=#{val}"
+      nil ->
+        param_string
+
+      val ->
+        if param_string == "", do: "?#{param}=#{val}", else: param_string <> "&{param}=#{val}"
     end
   end
 
   def auth_header do
     token = System.get_env("RUNSCOPE_TOKEN")
+
     if is_nil(token) do
       raise "Runscope token is missing"
     else

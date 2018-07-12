@@ -4,33 +4,47 @@ defmodule ExGeckoTest do
 
   require IEx
 
-  @fields  %{"fields" => %{"amount" => %{"type" => "number", "name" => "Amount",  "optional" => false}, "timestamp" => %{"type" => "datetime", "name" => "Date",  "optional" => false}}}
-  @req_fields %{"path" => %{"name" => "Request Path", "type" => "string", "optional" => false},
-     "speed" => %{"name" => "Request Speed", "type" => "number",  "optional" => false},
-     "timestamp" => %{"name" => "Date", "type" => "datetime",  "optional" => false},
-     "status" => %{"name" => "Status Code", "type" => "string",  "optional" => false},
-     "size" => %{"name" => "Request Size", "type" => "number",  "optional" => false}
-   }
-   @data %{"path" => "/api/testpath",
-          "speed" => 491,
-          "timestamp" => "2016-07-20T10:11:01Z",
-          "status" => "200",
-          "size" => 15010
-         }
+  @fields %{
+    "fields" => %{
+      "amount" => %{"type" => "number", "name" => "Amount", "optional" => false},
+      "timestamp" => %{"type" => "datetime", "name" => "Date", "optional" => false}
+    }
+  }
+  @req_fields %{
+    "path" => %{"name" => "Request Path", "type" => "string", "optional" => false},
+    "speed" => %{"name" => "Request Speed", "type" => "number", "optional" => false},
+    "timestamp" => %{"name" => "Date", "type" => "datetime", "optional" => false},
+    "status" => %{"name" => "Status Code", "type" => "string", "optional" => false},
+    "size" => %{"name" => "Request Size", "type" => "number", "optional" => false}
+  }
+  @data %{
+    "path" => "/api/testpath",
+    "speed" => 491,
+    "timestamp" => "2016-07-20T10:11:01Z",
+    "status" => "200",
+    "size" => 15010
+  }
 
-  @batch_fields %{"fields" => %{"globalid" => %{"type" => "string", "name"=>"Global Id"}, "testfield" => %{ "type" => "number", "name" => "Test Field"}}}
+  @batch_fields %{
+    "fields" => %{
+      "globalid" => %{"type" => "string", "name" => "Global Id"},
+      "testfield" => %{"type" => "number", "name" => "Test Field"}
+    }
+  }
   @batch_path "test/support/batch_request.json"
 
   setup do
-    name = "testset_" <> (:os.timestamp |> elem(2) |> Integer.to_string)
-    on_exit fn ->
+    name = "testset_" <> (:os.timestamp() |> elem(2) |> Integer.to_string())
+
+    on_exit(fn ->
       ExGecko.Api.delete(name)
-    end
+    end)
+
     {:ok, dataset: name}
   end
 
   test "should ping" do
-    resp = ExGecko.Api.ping
+    resp = ExGecko.Api.ping()
     assert {:ok, %{}} = resp
   end
 
@@ -58,16 +72,14 @@ defmodule ExGeckoTest do
   end
 
   test "should batch job of 2000 items", %{dataset: name} do
-    batch_data =  get_batch_data(@batch_path)
+    batch_data = get_batch_data(@batch_path)
     {:ok, _resp} = ExGecko.Api.find_or_create(name, @batch_fields)
-    {:ok, 2000}= ExGecko.Api.append(name, batch_data["data"])
+    {:ok, 2000} = ExGecko.Api.append(name, batch_data["data"])
   end
 
   def get_batch_data(path) do
     path
-    |> File.read!
-    |> Poison.Parser.parse!
+    |> File.read!()
+    |> Poison.Parser.parse!()
   end
-
-
 end

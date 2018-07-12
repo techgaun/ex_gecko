@@ -13,29 +13,37 @@ defmodule ExGecko.Adapter.Papertrail do
   """
 
   def load_events(opts) when is_nil(opts), do: load_events(%{})
+
   def load_events(opts) when is_bitstring(opts) do
-    new_opts = opts
-    |> String.split(",")
-    |> Enum.map(fn(key) -> String.split(key, "=", parts: 2) |> List.to_tuple end)
-    |> Map.new
+    new_opts =
+      opts
+      |> String.split(",")
+      |> Enum.map(fn key -> String.split(key, "=", parts: 2) |> List.to_tuple() end)
+      |> Map.new()
+
     load_events(new_opts)
   end
 
   def load_events(%{"search" => _search, "time" => _time} = opts) do
     Application.ensure_all_started(:porcelain)
-    IO.puts "Pulling papertrail logs"
+    IO.puts("Pulling papertrail logs")
+
     case Porcelain.exec("papertrail", build_args(opts)) do
       %{status: 0, out: output} ->
         lines = output |> String.split("\n")
+
         items =
           for line <- lines,
-            data = decode_line(line),
-            valid?(data), into: [], do: process_data(data)
+              data = decode_line(line),
+              valid?(data),
+              into: [],
+              do: process_data(data)
 
         items
         |> Enum.reject(&(map_size(&1) < 3))
+
       %{status: status, err: message} ->
-        IO.puts "error executing command, #{status}, #{message}"
+        IO.puts("error executing command, #{status}, #{message}")
         []
     end
   end
@@ -48,8 +56,9 @@ defmodule ExGecko.Adapter.Papertrail do
   def build_args(%{"search" => search, "time" => time} = opts) do
     args = ["-j", "-S", search, "--min-time", "'#{time}'"]
     config = opts["config"]
+
     if config do
-      IO.puts "using config file #{config}"
+      IO.puts("using config file #{config}")
       args ++ ["-c", config]
     else
       args
@@ -57,6 +66,7 @@ defmodule ExGecko.Adapter.Papertrail do
   end
 
   def decode_line(line) when is_nil(line) or line == "", do: nil
+
   def decode_line(line) do
     case Poison.decode(line) do
       {:ok, data} -> data
@@ -102,20 +112,33 @@ defmodule ExGecko.Adapter.Papertrail do
   """
   def process_data(data) do
     timestamp = data["received_at"]
+
     data["message"]
-    |> String.trim
+    |> String.trim()
     |> String.split(" ")
     |> Enum.reduce(%{"timestamp" => timestamp}, fn x, acc ->
       Map.merge(acc, _process_metric(x))
     end)
   end
 
-  def _process_metric("path=" <> path), do: %{"path" => (path |> String.replace(~S("), "") |> String.split("_=") |> Enum.at(0) |> String.slice(0, 99))}
+  def _process_metric("path=" <> path),
+    do: %{
+      "path" =>
+        path
+        |> String.replace(~S("), "")
+        |> String.split("_=")
+        |> Enum.at(0)
+        |> String.slice(0, 99)
+    }
+
   def _process_metric("status=" <> status), do: %{"status" => status}
   def _process_metric("method=" <> method), do: %{"method" => method}
   def _process_metric("bytes="), do: %{"size" => 0}
   def _process_metric("bytes=" <> size), do: %{"size" => String.to_integer(size)}
-  def _process_metric("service=" <> speed), do: %{"speed" => (speed |> String.replace("ms", "") |> intval)}
+
+  def _process_metric("service=" <> speed),
+    do: %{"speed" => speed |> String.replace("ms", "") |> intval}
+
   def _process_metric(~s({") <> _ = json) do
     case Poison.decode(json) do
       {:ok, json} ->
@@ -124,43 +147,60 @@ defmodule ExGecko.Adapter.Papertrail do
         else
           _process_json_metric(json, %{})
         end
-      _ -> %{}
+
+      _ ->
+        %{}
     end
   end
+
   def _process_metric(_), do: %{}
 
   def _process_json_metric(%{"status" => status} = json, acc) do
     _process_json_metric(
-      Map.drop(json, ~w(status)), Map.put(acc, "status", "#{status}")
+      Map.drop(json, ~w(status)),
+      Map.put(acc, "status", "#{status}")
     )
   end
+
   def _process_json_metric(%{"path" => path} = json, acc) do
     _process_json_metric(
-      Map.drop(json, ~w(path)), Map.put(acc, "path", path)
+      Map.drop(json, ~w(path)),
+      Map.put(acc, "path", path)
     )
   end
+
   def _process_json_metric(%{"duration" => speed} = json, acc) do
     _process_json_metric(
-      Map.drop(json, ~w(duration)), Map.put(acc, "speed", speed)
+      Map.drop(json, ~w(duration)),
+      Map.put(acc, "speed", speed)
     )
   end
+
   def _process_json_metric(%{"user_id" => user_id} = json, acc) do
     user_id = if is_binary(user_id), do: user_id, else: "anonymous"
+
     _process_json_metric(
-      Map.drop(json, ~w(user_id)), Map.put(acc, "user_id", user_id)
+      Map.drop(json, ~w(user_id)),
+      Map.put(acc, "user_id", user_id)
     )
   end
+
   def _process_json_metric(%{"method" => method} = json, acc) do
     method = String.upcase(method)
+
     _process_json_metric(
-      Map.drop(json, ~w(method)), Map.put(acc, "method", method)
+      Map.drop(json, ~w(method)),
+      Map.put(acc, "method", method)
     )
   end
+
   def _process_json_metric(%{"date_time" => time} = json, acc) do
     _process_json_metric(
-      Map.drop(json, ~w(date_time)), Map.put(acc, "timestamp", time)
+      Map.drop(json, ~w(date_time)),
+      Map.put(acc, "timestamp", time)
     )
   end
+
   def _process_json_metric(_, acc), do: acc
 
   defp intval(""), do: 0
